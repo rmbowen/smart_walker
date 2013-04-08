@@ -46,6 +46,17 @@ namespace SmartWalkerApplication.Commands
                         invalidCommand = false;
                     }
                 }
+                else if (words[0].Equals("Wireless"))
+                {
+                    if (words.Length == 1)
+                    {
+                        Console.WriteLine("Wireless Command Entered");
+                        invalidCommand = false;
+
+                        WirelessCommand wc = new WirelessCommand();
+                        wc.sendEmail("thomasdemeo@gmail.com", "def2191@rit.edu", "High There", "Poop Poop");
+                    }
+                }
                 if (invalidCommand) {
                     Console.WriteLine(input + " is not a valid command");
                     Console.WriteLine("Valid Commands Include:");
