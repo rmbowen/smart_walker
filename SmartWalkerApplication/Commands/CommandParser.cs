@@ -36,6 +36,9 @@ namespace SmartWalkerApplication.Commands
                     {
                         Console.WriteLine("Navigation Command Entered");
                         invalidCommand = false;
+
+
+
                     }
                 }
                 else if (words[0].Equals("Force"))
