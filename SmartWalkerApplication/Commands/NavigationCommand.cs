@@ -1,15 +1,22 @@
-﻿using System;
+﻿using SmartWalker;
+using System;
 using System.Collections.Generic;
 using System.IO.Ports;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Timers;
+using System.Windows;
+using System.Windows.Input;
+using Microsoft.Kinect;
+using System.Diagnostics; 
 
 namespace SmartWalkerApplication.Commands
 {
     class NavigationCommand
     {
-
+        static SmartWalkerKinect walkerKinect;
+        private bool endProgram = false;
         static SerialPort port;
 
         public NavigationCommand()
@@ -18,11 +25,14 @@ namespace SmartWalkerApplication.Commands
         }
 
 
-        private void start()
+        public void start()
         {
+            // Start the Kinect Program Piece
+            startKinect();
 
             getIMUData();
 
+            // Send data to IMU?
             Console.WriteLine("Send:");
 
             for (; ; )
@@ -33,7 +43,30 @@ namespace SmartWalkerApplication.Commands
             }
         }
 
-        public void getIMUData()
+        private void startKinect()
+        {
+            walkerKinect = new SmartWalkerKinect();
+
+            walkerKinect.startKinect();
+
+
+            System.Timers.Timer aTimer = new System.Timers.Timer();
+            aTimer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
+            // Set the Interval to 10 seconds.
+            aTimer.Interval = 10000;
+            aTimer.Enabled = true;
+            while (endProgram) { }
+        }
+
+        // Specify what you want to happen when the Elapsed event is raised.
+        private void OnTimedEvent(object source, ElapsedEventArgs e)
+        {
+            walkerKinect.printMap();
+            walkerKinect.stopKinect();
+            endProgram = true;
+        }
+
+        private void getIMUData()
         {
             foreach (string p in SerialPort.GetPortNames())
             {

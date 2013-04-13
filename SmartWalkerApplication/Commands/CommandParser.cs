@@ -22,6 +22,7 @@ namespace SmartWalkerApplication.Commands
                 Console.WriteLine();
                 string[] words = input.Split(' ');
                 bool invalidCommand = true;
+
                 if (words[0].Equals("Mic"))
                 {
                     if (words.Length == 1)
@@ -37,7 +38,11 @@ namespace SmartWalkerApplication.Commands
                         Console.WriteLine("Navigation Command Entered");
                         invalidCommand = false;
 
-
+                        NavigationCommand nc = new NavigationCommand();
+                        nc.start();
+                        //nc.startKinect();
+                        //SmartWalkerKinect
+                        //nc.getIMUData();
 
                     }
                 }
@@ -47,6 +52,18 @@ namespace SmartWalkerApplication.Commands
                     {
                         Console.WriteLine("Force Command Entered");
                         invalidCommand = false;
+                    }
+                }
+                else if (words[0].Equals("Thermal"))
+                {
+                    if (words.Length == 1)
+                    {
+                        Console.WriteLine("Thermal Command Entered");
+                        invalidCommand = false;
+
+                        ThermalCommand tc = new ThermalCommand();
+                        string temperature = tc.start();
+                        Console.WriteLine(temperature);
                     }
                 }
                 else if (words[0].Equals("Wireless"))
