@@ -38,7 +38,7 @@ namespace SmartWalkerApplication.Commands
                         Console.WriteLine("Navigation Command Entered");
                         invalidCommand = false;
 
-                        NavigationCommand nc = new NavigationCommand();
+                        NavigationCommand nc = new NavigationCommand(int.Parse(words[1]));
                         nc.start();
                         //nc.startKinect();
                         //SmartWalkerKinect

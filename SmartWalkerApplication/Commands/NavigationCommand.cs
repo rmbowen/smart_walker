@@ -9,19 +9,26 @@ using System.Timers;
 using System.Windows;
 using System.Windows.Input;
 using Microsoft.Kinect;
-using System.Diagnostics; 
+using System.Diagnostics;
+using SmartWalkerApplication.Commands.COMConnection;
 
 namespace SmartWalkerApplication.Commands
 {
     class NavigationCommand
     {
         static SmartWalkerKinect walkerKinect;
-        private bool endProgram = false;
-        static SerialPort port;
 
-        public NavigationCommand()
+        private COMConnection.COMConnection port;
+
+        // Settings for connecting to Arduino
+        private const string portName = @"COM8";
+        private const int baudRate = 9600;
+
+        private int initialDirectionDegree;
+
+        public NavigationCommand(int initialDirectionDegree)
         {
-
+            this.initialDirectionDegree = initialDirectionDegree;
         }
 
 
@@ -30,17 +37,86 @@ namespace SmartWalkerApplication.Commands
             // Start the Kinect Program Piece
             startKinect();
 
-            getIMUData();
+            port = COMConnection.COMConnection.Instance;
 
+            int startingDegree = getAverageCurrentLocationInDegrees();
+
+            int degreeDifference = getDegreeAddition(startingDegree, initialDirectionDegree);
+            //int degreeDifference = startingDegree - initialDirectionDegree;
+
+            Console.WriteLine("Degree IMU Needs to get to: " + degreeDifference);
+
+            
+            while (true)
+            {
+                if (walkerKinect.isBlocked())
+                {
+
+                    Console.WriteLine("START TURNING SLOWLY!");
+                }
+                else if (walkerKinect.isEmergency())
+                {
+                    Console.WriteLine("STOP, START TURNING!");
+                }
+                else
+                {
+
+                }
+            }
+            
+
+         /*   if (!SmartWalkerKinect.isBlocked())
+            {
+
+            }
+            */
+            
             // Send data to IMU?
-            Console.WriteLine("Send:");
+            //Console.WriteLine("Send:");
 
+            //port.WriteLine("L");
+            //port.WriteLine("1100");
+
+            /*
             for (; ; )
             {
                 Console.WriteLine(" ");
                 Console.WriteLine("> ");
                 port.WriteLine(Console.ReadLine());
             }
+             * */
+            port.closeConnection();
+            //port.Close();
+        }
+
+        private int getDegreeAddition(int startDegree, int endDegree)
+        {
+            int result = startDegree + endDegree;
+            if (result > 360)
+            {
+                result = result - 360;
+            }
+            return result;
+        }
+
+        private int getAverageCurrentLocationInDegrees()
+        {
+            int startingDegree1 = getCurrentLocationInDegrees();
+            int startingDegree2 = getCurrentLocationInDegrees();
+            int startingDegree3 = getCurrentLocationInDegrees();
+
+            return ((startingDegree1 + startingDegree2 + startingDegree3) / 3);
+
+        }
+
+        private int getCurrentLocationInDegrees()
+        {
+            port.sendString("D");
+             //Delay a bit for the serial to catch up
+            System.Threading.Thread.Sleep(200);
+
+            int degree = int.Parse(port.readLineString());
+            return degree;
         }
 
         private void startKinect()
@@ -48,14 +124,21 @@ namespace SmartWalkerApplication.Commands
             walkerKinect = new SmartWalkerKinect();
 
             walkerKinect.startKinect();
-
-
+            /*
             System.Timers.Timer aTimer = new System.Timers.Timer();
             aTimer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
             // Set the Interval to 10 seconds.
             aTimer.Interval = 10000;
             aTimer.Enabled = true;
             while (endProgram) { }
+             * */
+            Console.WriteLine("Kinect is Waiting:");
+            /*if (Console.ReadLine() != null)
+            {
+                walkerKinect.printMap();
+                walkerKinect.stopKinect();
+            }
+             * /
         }
 
         // Specify what you want to happen when the Elapsed event is raised.
@@ -63,48 +146,8 @@ namespace SmartWalkerApplication.Commands
         {
             walkerKinect.printMap();
             walkerKinect.stopKinect();
-            endProgram = true;
+            //endProgram = true;
         }
-
-        private void getIMUData()
-        {
-            foreach (string p in SerialPort.GetPortNames())
-            {
-                Console.WriteLine(p);
-            }
-
-            int baud;
-            string name;
-
-            Console.Write("Port Name:");
-
-            name = Console.ReadLine();
-            Console.WriteLine(" ");
-            Console.WriteLine("Baud rate:");
-            baud = GetBaudRate();
-
-            Console.WriteLine("Beging Serial...");
-
-            BeginSerial(baud, name);
-            port.DataReceived += new SerialDataReceivedEventHandler(port_DataReceived);
-            port.Open();
-
-            Console.WriteLine("Serial Started.");
-            Console.WriteLine(" ");
-            Console.WriteLine("Ctrl+C to exit program");
-
-        }
-
-        // asdfasdf
-        static void port_DataReceived(object sender, SerialDataReceivedEventArgs e)
-        {
-            for (int i = 0; i < (10000 * port.BytesToRead) / port.BaudRate; i++)
-                ;       //Delay a bit for the serial to catch up
-            Console.Write(port.ReadExisting());
-            //Console.WriteLine("");
-            //Console.WriteLine("> ");
-        }
-
 
         // Function to get the baud rate
         static int GetBaudRate()
@@ -119,12 +162,5 @@ namespace SmartWalkerApplication.Commands
                 return GetBaudRate();
             }
         }
-
-        // Begin serial
-        static void BeginSerial(int baud, string name)
-        {
-            port = new SerialPort(name, baud);
-        }
     }
-
 }

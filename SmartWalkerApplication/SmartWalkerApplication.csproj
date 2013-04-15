@@ -45,6 +45,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Commands\COMConnection\COMConnection.cs" />
     <Compile Include="Commands\CommandParser.cs" />
     <Compile Include="Commands\Kinect\MainTest.cs" />
     <Compile Include="Commands\Kinect\SmartWalker.cs" />

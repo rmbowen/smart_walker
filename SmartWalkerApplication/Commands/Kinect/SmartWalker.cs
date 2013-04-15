@@ -21,14 +21,23 @@ namespace SmartWalker
         const int obstacleThreshold = 1250;
         const int mapThreshold = 2000;
 
+        const string fileName = @"C:\Users\tjd9961\Desktop\SmartWalkerData\mapTest2.txt";
+
         static KinectSensor sensor;
 
+        int kinectUpCount = 0;
+        int kinectDownCount = 0;
+
         public int[,] floorMap = new int[1000, 1000];
-        public int[,] floorMapFinal = new int[1000, 1000];
         int[,] columnMins = new int[320, 2];
 
         int xStartIndex = 500;
         int yStartIndex = 500;
+
+        int minXPos = -1;
+        int maxXPos = -1;
+        int minYPos = -1;
+        int maxYPos = -1;
 
         double angle = 0.0;
         double xPos = 0.0;
@@ -56,13 +65,14 @@ namespace SmartWalker
         bool leftBlocked = false;
         bool rightBlocked = false;
         bool allFramesInitialized = false;
+        bool kinectIsLevel = false;
 
         const float MaxDepthDistance = 4095; // max value returned
         const float MinDepthDistance = 850; // min value returned
         const float MaxDepthDistanceOffset = MaxDepthDistance - MinDepthDistance;
 
         const double pi = 3.141593;
-        
+
         public SmartWalkerKinect()
         {
             sensor = KinectSensor.KinectSensors.Where(s => s.Status == KinectStatus.Connected).FirstOrDefault();
@@ -71,7 +81,7 @@ namespace SmartWalker
         public void startKinect()
         {
             // Find the first connected sensor
-            
+
             if (sensor == null)
             {
                 Console.WriteLine("No Kinect sensor found!");
@@ -132,12 +142,10 @@ namespace SmartWalker
             }
         }
 
-        public byte[] GenerateColoredBytes(DepthImageFrame depthFrame)
+        private byte[] GenerateColoredBytes(DepthImageFrame depthFrame)
         {
             int rowCounter = 0;
             int columnCounter = 0;
-
-            int rowCnt = 0;
             int columnCnt = 0;
 
             bool leftFrameBlocked = false;
@@ -161,6 +169,33 @@ namespace SmartWalker
             FrameRateCount++;
             if (FrameRateCount == FrameRateDivide)
             {
+                if (kinectUpCount == 0)
+                {
+                    sensor.ElevationAngle = 27;
+                }
+
+                if (kinectUpCount < 75)
+                {
+                    kinectUpCount++;
+                }
+                else
+                {
+                    if (kinectDownCount == 0)
+                    {
+                        sensor.ElevationAngle = -27;
+                    }
+
+                    if (kinectDownCount < 75)
+                    {
+                        kinectDownCount++;
+                    }
+                    else if (kinectIsLevel == false)
+                    {
+                        kinectIsLevel = true;
+                        sensor.ElevationAngle = 0;
+                        floorMap = new int[1000, 1000];
+                    }
+                }
                 FrameRateCount = 0;
 
                 //Bgr32  - Blue, Green, Red, empty byte
@@ -215,8 +250,6 @@ namespace SmartWalker
                             //if (angle != localAngle || xPos != localxPos || yPos != localyPos)
                             //{
                             columnMins = new int[320, 2];
-                            floorMapFinal = floorMap;
-                            floorMap = new int[1000, 1000];
                             //    localAngle = angle;
                             //    localxPos = xPos;
                             //    localyPos = yPos;
@@ -257,17 +290,29 @@ namespace SmartWalker
                     {
                         thetaH = thetaHFull - (28.5 / 180.0 * pi);
                     }
+                    else
+                    {
+                        thetaH = (28.5 / 180.0 * pi) - thetaHFull;
+                    }
                     if (rowCounter >= 120)
                     {
                         thetaV -= 21.5 / 180.0 * pi;
+                    }
+                    else
+                    {
+                        thetaV = (21.5 / 180.0 * pi) - thetaV;
                     }
 
                     //.9M or 2.95'
                     if (depth <= obstacleThreshold && depth >= 0 && allFramesInitialized)
                     {
+                        double temp = Math.Sin(thetaH);
+                        double temp2 = temp * depth;
                         if ((depth * Math.Sin(thetaH)) < (walkerWidth / 2.0))
                         {
-                            if (((rowCounter < 120) && ((depth * Math.Sin(thetaV)) < (walkerHeight - kinectHeight))) || ((rowCounter >= 120) && ((depth * Math.Sin(thetaV)) < (kinectHeight - 20.0))))
+                            //double temp = Math.Sin(thetaH);
+                            //double temp2 = temp * depth;
+                            if (((rowCounter < 120) && ((depth * Math.Sin(thetaV)) < (walkerHeight - kinectHeight))) || ((rowCounter >= 120) && ((depth * Math.Sin(thetaV)) < (kinectHeight))))
                             {
                                 if (columnCounter != 0 && rowCounter != 0)
                                 {
@@ -410,7 +455,7 @@ namespace SmartWalker
                         }
 
                         //we are very close
-                        if (((rowCounter < 120) && ((depth * Math.Sin(thetaV)) < (walkerHeight - kinectHeight))) || ((rowCounter >= 120) && ((depth * Math.Sin(thetaV)) < (kinectHeight - 19.0))))
+                        if ((((rowCounter < 120) && ((depth * Math.Sin(thetaV)) < (walkerHeight - kinectHeight))) || ((rowCounter >= 120) && ((depth * Math.Sin(thetaV)) < (kinectHeight - 19.0)))) && ((depth * Math.Sin(thetaH)) < (walkerWidth / 2.0)))
                         {
                             pixels[colorIndex + BlueIndex] = 255;
                             pixels[colorIndex + GreenIndex] = 0;
@@ -553,7 +598,7 @@ namespace SmartWalker
                                     }
                                     else
                                     {
-                                        if (floorMap[xMapLoop, yMapLoop] != 1)
+                                        if (floorMap[xMapLoop, yMapLoop] == 0)
                                         {
                                             floorMap[xMapLoop, yMapLoop] = 3;
                                         }
@@ -606,7 +651,7 @@ namespace SmartWalker
             {
                 for (ii = 0; ii < 1000; ii++)
                 {
-                    if (floorMapFinal[ii, jj] != 0)
+                    if (floorMap[ii, jj] != 0)
                     {
                         if (topPixel == -1)
                         {
@@ -633,7 +678,7 @@ namespace SmartWalker
                 }
             }
 
-            using (System.IO.StreamWriter file = new System.IO.StreamWriter(@"C:\Users\Steve\Desktop\maps\mapTest3.txt"))
+            using (System.IO.StreamWriter file = new System.IO.StreamWriter(fileName))
             {
                 if ((topPixel == bottomPixel) || (leftPixel == rightPixel) || (leftPixel == -1) || (rightPixel == -1) || (topPixel == -1) || (bottomPixel == -1))
                 {
@@ -648,7 +693,7 @@ namespace SmartWalker
                         {
                             if (hh >= topPixel && hh <= bottomPixel && ww >= leftPixel && ww <= rightPixel)
                             {
-                                switch (floorMapFinal[ww, hh])
+                                switch (floorMap[ww, hh])
                                 {
                                     case 0:
                                         line += "|";
@@ -673,7 +718,7 @@ namespace SmartWalker
                     }
                 }
             }
-            using (System.IO.StreamWriter file = new System.IO.StreamWriter(@"C:\Users\Steve\Desktop\maps\mapTest4.txt"))
+            using (System.IO.StreamWriter file = new System.IO.StreamWriter(fileName))
             {
                 if ((topPixel == bottomPixel) || (leftPixel == rightPixel) || (leftPixel == -1) || (rightPixel == -1) || (topPixel == -1) || (bottomPixel == -1))
                 {
@@ -688,7 +733,7 @@ namespace SmartWalker
                         {
                             if (hh >= topPixel && hh <= bottomPixel && ww >= leftPixel && ww <= rightPixel)
                             {
-                                switch (floorMapFinal[ww, hh])
+                                switch (floorMap[ww, hh])
                                 {
                                     case 0:
                                         line += "|";
@@ -696,8 +741,11 @@ namespace SmartWalker
                                     case 1:
                                         line += "0";
                                         break;
-                                    default:
+                                    case 2:
                                         line += " ";
+                                        break;
+                                    default:
+                                        line += "|";
                                         break;
                                 }
                             }
@@ -710,6 +758,11 @@ namespace SmartWalker
                     }
                 }
             }
+        }
+
+        public static void setAngle(int newAngle)
+        {
+
         }
     }
 }
