@@ -26,6 +26,10 @@ namespace SmartWalkerApplication.Commands.COMConnection
                      instance = new COMConnection();
                      port = new SerialPort(portName, baudRate);
                      //port.WriteTimeout = 500;
+                     port.DataBits = 8;
+                     port.StopBits = StopBits.One;
+                     port.Parity = Parity.None;
+                     port.Handshake = Handshake.None;
                      port.Open();
                      if (port.IsOpen)
                      {

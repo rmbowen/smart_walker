@@ -48,11 +48,15 @@ namespace SmartWalkerApplication.Commands
             {
                 //System.Threading.Thread.Sleep(5000);
                 // send mode
+                port.sendString(Console.ReadLine());
+                System.Threading.Thread.Sleep(500);
+
                 string myString = Console.ReadLine();
-                port.sendString("N");
-                System.Threading.Thread.Sleep(5000);
+                //System.Threading.Thread.Sleep(500);
 
                 port.sendString(myString);
+                System.Threading.Thread.Sleep(1000);
+
                 //System.Threading.Thread.Sleep(500);
 
                 // send right ticks
