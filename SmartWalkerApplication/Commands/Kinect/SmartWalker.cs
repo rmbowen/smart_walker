@@ -18,10 +18,9 @@ namespace SmartWalker
         const double walkerHeight = 38.0 * 2.54 * 10.0; // convert value from inches to millimeters
         const double walkerWidth = 25.0 * 2.54 * 10.0;
         const double kinectHeight = 19.0 * 2.54 * 10.0;
-        const int obstacleThreshold = 1250;
+        const int obstacleThreshold = 1100;
         const int mapThreshold = 2000;
-
-        const string fileName = @"C:\Users\tjd9961\Desktop\SmartWalkerData\mapTest2.txt";
+        const int emergencyThreshold = 800;
 
         static KinectSensor sensor;
 
@@ -33,11 +32,6 @@ namespace SmartWalker
 
         int xStartIndex = 500;
         int yStartIndex = 500;
-
-        int minXPos = -1;
-        int maxXPos = -1;
-        int minYPos = -1;
-        int maxYPos = -1;
 
         double angle = 0.0;
         double xPos = 0.0;
@@ -51,8 +45,8 @@ namespace SmartWalker
         double thetaH = 0.0;
         double thetaV = 0.0;
 
-        int FrameRateDivide = 2;
-        int FrameRateCount = 1;
+        int FrameRateDivide = 3;
+        int FrameRateCount = 2;
 
         int frameCount = 1;
         int[,] frame1 = new int[320, 240];
@@ -65,7 +59,11 @@ namespace SmartWalker
         bool leftBlocked = false;
         bool rightBlocked = false;
         bool allFramesInitialized = false;
+        bool kinectIsUp = true;
+        bool kinectisDown = false;
         bool kinectIsLevel = false;
+
+        bool emergencyBlocked = false;
 
         const float MaxDepthDistance = 4095; // max value returned
         const float MinDepthDistance = 850; // min value returned
@@ -97,7 +95,6 @@ namespace SmartWalker
 
             // Start the sensor
             sensor.Start();
-
             //kinectSensorChooser1.Kinect.ElevationAngle = 27;
             //System.Threading.Thread.Sleep(new TimeSpan(hours: 0, minutes: 0, seconds: 2));
             //kinectSensorChooser1.Kinect.ElevationAngle = -27;
@@ -150,6 +147,7 @@ namespace SmartWalker
 
             bool leftFrameBlocked = false;
             bool rightFrameBlocked = false;
+            bool emergencyFrameBlocked = false;
 
             int neighbor1, neighbor2, neighbor3 = 0;
             int pastFrame1Pixel1, pastFrame1Pixel2, pastFrame1Pixel3, pastFrame1Pixel4;
@@ -182,6 +180,8 @@ namespace SmartWalker
                 {
                     if (kinectDownCount == 0)
                     {
+                        kinectIsUp = false;
+                        kinectisDown = true;
                         sensor.ElevationAngle = -27;
                     }
 
@@ -191,9 +191,9 @@ namespace SmartWalker
                     }
                     else if (kinectIsLevel == false)
                     {
+                        kinectisDown = false;
                         kinectIsLevel = true;
                         sensor.ElevationAngle = 0;
-                        floorMap = new int[1000, 1000];
                     }
                 }
                 FrameRateCount = 0;
@@ -270,6 +270,14 @@ namespace SmartWalker
                             {
                                 rightBlocked = false;
                             }
+                            if (emergencyFrameBlocked)
+                            {
+                                emergencyBlocked = true;
+                            }
+                            else
+                            {
+                                emergencyBlocked = false;
+                            }
                             if (frameCount == 4)
                             {
                                 frameCount = 1;
@@ -303,8 +311,173 @@ namespace SmartWalker
                         thetaV = (21.5 / 180.0 * pi) - thetaV;
                     }
 
+                    if (kinectIsUp || kinectisDown)
+                    {
+                        thetaV += 21.5;
+                    }
+
                     //.9M or 2.95'
-                    if (depth <= obstacleThreshold && depth >= 0 && allFramesInitialized)
+                    if (depth <= emergencyThreshold && depth >= 0 && allFramesInitialized)
+                    {
+                        double temp = Math.Sin(thetaH);
+                        double temp2 = temp * depth;
+                        if ((depth * Math.Sin(thetaH)) < (walkerWidth / 2.0))
+                        {
+                            //double temp = Math.Sin(thetaH);
+                            //double temp2 = temp * depth;
+                            if (((rowCounter < 120) && ((depth * Math.Sin(thetaV)) < (walkerHeight - kinectHeight))) || ((rowCounter >= 120) && ((depth * Math.Sin(thetaV)) < (kinectHeight))))
+                            {
+                                if (columnCounter != 0 && rowCounter != 0)
+                                {
+                                    switch (frameCount)
+                                    {
+                                        case 1:
+                                            neighbor1 = frame1[columnCounter - 1, rowCounter];
+                                            neighbor2 = frame1[columnCounter, rowCounter - 1];
+                                            neighbor3 = frame1[columnCounter - 1, rowCounter - 1];
+                                            pastFrame1Pixel1 = frame4[columnCounter - 1, rowCounter];
+                                            pastFrame1Pixel2 = frame4[columnCounter, rowCounter - 1];
+                                            pastFrame1Pixel3 = frame4[columnCounter - 1, rowCounter - 1];
+                                            pastFrame1Pixel4 = frame4[columnCounter, rowCounter];
+                                            pastFrame2Pixel1 = frame3[columnCounter - 1, rowCounter];
+                                            pastFrame2Pixel2 = frame3[columnCounter, rowCounter - 1];
+                                            pastFrame2Pixel3 = frame3[columnCounter - 1, rowCounter - 1];
+                                            pastFrame2Pixel4 = frame3[columnCounter, rowCounter];
+                                            pastFrame3Pixel1 = frame2[columnCounter - 1, rowCounter];
+                                            pastFrame3Pixel2 = frame2[columnCounter, rowCounter - 1];
+                                            pastFrame3Pixel3 = frame2[columnCounter - 1, rowCounter - 1];
+                                            pastFrame3Pixel4 = frame2[columnCounter, rowCounter];
+                                            break;
+                                        case 2:
+                                            neighbor1 = frame2[columnCounter - 1, rowCounter];
+                                            neighbor2 = frame2[columnCounter, rowCounter - 1];
+                                            neighbor3 = frame2[columnCounter - 1, rowCounter - 1];
+                                            pastFrame1Pixel1 = frame1[columnCounter - 1, rowCounter];
+                                            pastFrame1Pixel2 = frame1[columnCounter, rowCounter - 1];
+                                            pastFrame1Pixel3 = frame1[columnCounter - 1, rowCounter - 1];
+                                            pastFrame1Pixel4 = frame1[columnCounter, rowCounter];
+                                            pastFrame2Pixel1 = frame4[columnCounter - 1, rowCounter];
+                                            pastFrame2Pixel2 = frame4[columnCounter, rowCounter - 1];
+                                            pastFrame2Pixel3 = frame4[columnCounter - 1, rowCounter - 1];
+                                            pastFrame2Pixel4 = frame4[columnCounter, rowCounter];
+                                            pastFrame3Pixel1 = frame3[columnCounter - 1, rowCounter];
+                                            pastFrame3Pixel2 = frame3[columnCounter, rowCounter - 1];
+                                            pastFrame3Pixel3 = frame3[columnCounter - 1, rowCounter - 1];
+                                            pastFrame3Pixel4 = frame3[columnCounter, rowCounter];
+                                            break;
+                                        case 3:
+                                            neighbor1 = frame3[columnCounter - 1, rowCounter];
+                                            neighbor2 = frame3[columnCounter, rowCounter - 1];
+                                            neighbor3 = frame3[columnCounter - 1, rowCounter - 1];
+                                            pastFrame1Pixel1 = frame2[columnCounter - 1, rowCounter];
+                                            pastFrame1Pixel2 = frame2[columnCounter, rowCounter - 1];
+                                            pastFrame1Pixel3 = frame2[columnCounter - 1, rowCounter - 1];
+                                            pastFrame1Pixel4 = frame2[columnCounter, rowCounter];
+                                            pastFrame2Pixel1 = frame1[columnCounter - 1, rowCounter];
+                                            pastFrame2Pixel2 = frame1[columnCounter, rowCounter - 1];
+                                            pastFrame2Pixel3 = frame1[columnCounter - 1, rowCounter - 1];
+                                            pastFrame2Pixel4 = frame1[columnCounter, rowCounter];
+                                            pastFrame3Pixel1 = frame4[columnCounter - 1, rowCounter];
+                                            pastFrame3Pixel2 = frame4[columnCounter, rowCounter - 1];
+                                            pastFrame3Pixel3 = frame4[columnCounter - 1, rowCounter - 1];
+                                            pastFrame3Pixel4 = frame4[columnCounter, rowCounter];
+                                            break;
+                                        default:
+                                            neighbor1 = frame4[columnCounter - 1, rowCounter];
+                                            neighbor2 = frame4[columnCounter, rowCounter - 1];
+                                            neighbor3 = frame4[columnCounter - 1, rowCounter - 1];
+                                            pastFrame1Pixel1 = frame3[columnCounter - 1, rowCounter];
+                                            pastFrame1Pixel2 = frame3[columnCounter, rowCounter - 1];
+                                            pastFrame1Pixel3 = frame3[columnCounter - 1, rowCounter - 1];
+                                            pastFrame1Pixel4 = frame3[columnCounter, rowCounter];
+                                            pastFrame2Pixel1 = frame2[columnCounter - 1, rowCounter];
+                                            pastFrame2Pixel2 = frame2[columnCounter, rowCounter - 1];
+                                            pastFrame2Pixel3 = frame2[columnCounter - 1, rowCounter - 1];
+                                            pastFrame2Pixel4 = frame2[columnCounter, rowCounter];
+                                            pastFrame3Pixel1 = frame1[columnCounter - 1, rowCounter];
+                                            pastFrame3Pixel2 = frame1[columnCounter, rowCounter - 1];
+                                            pastFrame3Pixel3 = frame1[columnCounter - 1, rowCounter - 1];
+                                            pastFrame3Pixel4 = frame1[columnCounter, rowCounter];
+                                            break;
+                                    }
+
+                                    if (neighbor1 <= obstacleThreshold && neighbor1 >= 0)
+                                    {
+                                        if (neighbor2 <= obstacleThreshold && neighbor2 >= 0)
+                                        {
+                                            if (neighbor3 <= obstacleThreshold && neighbor3 >= 0)
+                                            {
+                                                if (pastFrame1Pixel1 <= obstacleThreshold && pastFrame1Pixel1 >= 0)
+                                                {
+                                                    if (pastFrame1Pixel2 <= obstacleThreshold && pastFrame1Pixel2 >= 0)
+                                                    {
+                                                        if (pastFrame1Pixel3 <= obstacleThreshold && pastFrame1Pixel3 >= 0)
+                                                        {
+                                                            if (pastFrame1Pixel4 <= obstacleThreshold && pastFrame1Pixel4 >= 0)
+                                                            {
+                                                                if (pastFrame2Pixel1 <= obstacleThreshold && pastFrame2Pixel1 >= 0)
+                                                                {
+                                                                    if (pastFrame2Pixel2 <= obstacleThreshold && pastFrame2Pixel2 >= 0)
+                                                                    {
+                                                                        if (pastFrame2Pixel3 <= obstacleThreshold && pastFrame2Pixel3 >= 0)
+                                                                        {
+                                                                            if (pastFrame2Pixel4 <= obstacleThreshold && pastFrame2Pixel4 >= 0)
+                                                                            {
+                                                                                if (pastFrame3Pixel1 <= obstacleThreshold && pastFrame3Pixel1 >= 0)
+                                                                                {
+                                                                                    if (pastFrame3Pixel2 <= obstacleThreshold && pastFrame3Pixel2 >= 0)
+                                                                                    {
+                                                                                        if (pastFrame3Pixel3 <= obstacleThreshold && pastFrame3Pixel3 >= 0)
+                                                                                        {
+                                                                                            if (pastFrame3Pixel4 <= obstacleThreshold && pastFrame3Pixel4 >= 0)
+                                                                                            {
+                                                                                                emergencyFrameBlocked = true;
+                                                                                            }
+                                                                                        }
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        if (((rowCounter < 120) && ((depth * Math.Sin(thetaV)) < (walkerHeight - kinectHeight))))
+                        {
+                            double value1 = depth * Math.Sin(thetaV);
+                        }
+                        if (((rowCounter >= 120) && ((depth * Math.Sin(thetaV)) < (kinectHeight))))
+                        {
+                            double value2 = depth * Math.Sin(thetaV);
+                        }
+
+                        //we are very close
+                        if ((((rowCounter < 120) && ((depth * Math.Sin(thetaV)) < (walkerHeight - kinectHeight))) || ((rowCounter >= 120) && ((depth * Math.Sin(thetaV)) < (kinectHeight - 19.0)))) && ((depth * Math.Sin(thetaH)) < (walkerWidth / 2.0)))
+                        {
+                            pixels[colorIndex + BlueIndex] = 255;
+                            pixels[colorIndex + GreenIndex] = 0;
+                            pixels[colorIndex + RedIndex] = 0;
+                        }
+                        else
+                        {
+                            pixels[colorIndex + BlueIndex] = 255;
+                            pixels[colorIndex + GreenIndex] = 255;
+                            pixels[colorIndex + RedIndex] = 0;
+                        }
+
+                    }
+
+
+                    else if (depth > emergencyThreshold && depth < obstacleThreshold)
                     {
                         double temp = Math.Sin(thetaH);
                         double temp2 = temp * depth;
@@ -457,20 +630,17 @@ namespace SmartWalker
                         //we are very close
                         if ((((rowCounter < 120) && ((depth * Math.Sin(thetaV)) < (walkerHeight - kinectHeight))) || ((rowCounter >= 120) && ((depth * Math.Sin(thetaV)) < (kinectHeight - 19.0)))) && ((depth * Math.Sin(thetaH)) < (walkerWidth / 2.0)))
                         {
-                            pixels[colorIndex + BlueIndex] = 255;
-                            pixels[colorIndex + GreenIndex] = 0;
-                            pixels[colorIndex + RedIndex] = 0;
+                            pixels[colorIndex + BlueIndex] = 0;
+                            pixels[colorIndex + GreenIndex] = 255;
+                            pixels[colorIndex + RedIndex] = 255;
                         }
                         else
                         {
-                            pixels[colorIndex + BlueIndex] = 255;
-                            pixels[colorIndex + GreenIndex] = 255;
-                            pixels[colorIndex + RedIndex] = 0;
+                            pixels[colorIndex + BlueIndex] = 50;
+                            pixels[colorIndex + GreenIndex] = 150;
+                            pixels[colorIndex + RedIndex] = 100;
                         }
-
-
                     }
-
                     //else if (depth < 0)
                     //{
                     //    currentRow += "_";
@@ -632,6 +802,17 @@ namespace SmartWalker
             return pixels;
         }
 
+        public bool isBlocked()
+        {
+            return (leftBlocked || rightBlocked);
+        }
+
+        public bool isEmergency()
+        {
+            return emergencyBlocked;
+        }
+
+
         public void printMap()
         {
             string line = "";
@@ -678,7 +859,7 @@ namespace SmartWalker
                 }
             }
 
-            using (System.IO.StreamWriter file = new System.IO.StreamWriter(fileName))
+            using (System.IO.StreamWriter file = new System.IO.StreamWriter(@"C:\Users\Steve\Desktop\maps\mapTest1.txt"))
             {
                 if ((topPixel == bottomPixel) || (leftPixel == rightPixel) || (leftPixel == -1) || (rightPixel == -1) || (topPixel == -1) || (bottomPixel == -1))
                 {
@@ -718,7 +899,7 @@ namespace SmartWalker
                     }
                 }
             }
-            using (System.IO.StreamWriter file = new System.IO.StreamWriter(fileName))
+            using (System.IO.StreamWriter file = new System.IO.StreamWriter(@"C:\Users\Steve\Desktop\maps\mapTest2.txt"))
             {
                 if ((topPixel == bottomPixel) || (leftPixel == rightPixel) || (leftPixel == -1) || (rightPixel == -1) || (topPixel == -1) || (bottomPixel == -1))
                 {

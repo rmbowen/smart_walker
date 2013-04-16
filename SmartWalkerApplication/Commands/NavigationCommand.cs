@@ -35,35 +35,50 @@ namespace SmartWalkerApplication.Commands
         public void start()
         {
             // Start the Kinect Program Piece
-            startKinect();
+            //startKinect();
 
             port = COMConnection.COMConnection.Instance;
 
-            int startingDegree = getAverageCurrentLocationInDegrees();
+            //int startingDegree = getAverageCurrentLocationInDegrees();
 
-            int degreeDifference = getDegreeAddition(startingDegree, initialDirectionDegree);
-            //int degreeDifference = startingDegree - initialDirectionDegree;
+            //int degreeDifference = getDegreeAddition(startingDegree, initialDirectionDegree);
 
-            Console.WriteLine("Degree IMU Needs to get to: " + degreeDifference);
-
-            
+            //Console.WriteLine("Degree IMU Needs to get to: " + degreeDifference);
             while (true)
             {
-                if (walkerKinect.isBlocked())
-                {
+                //System.Threading.Thread.Sleep(5000);
+                // send mode
+                string myString = Console.ReadLine();
+                port.sendString("N");
+                System.Threading.Thread.Sleep(5000);
 
-                    Console.WriteLine("START TURNING SLOWLY!");
-                }
-                else if (walkerKinect.isEmergency())
+                port.sendString(myString);
+                //System.Threading.Thread.Sleep(500);
+
+                // send right ticks
+               // port.sendString(Console.ReadLine());
+
+                // send left ticks
+                //port.sendString(Console.ReadLine());
+
+            }
+            /*
+            while (true)
+            {
+                if (walkerKinect.isEmergency())
                 {
                     Console.WriteLine("STOP, START TURNING!");
+                }
+                else if (walkerKinect.isBlocked())
+                {
+                    Console.WriteLine("START TURNING SLOWLY!");
                 }
                 else
                 {
 
                 }
             }
-            
+            */
 
          /*   if (!SmartWalkerKinect.isBlocked())
             {
@@ -138,7 +153,7 @@ namespace SmartWalkerApplication.Commands
                 walkerKinect.printMap();
                 walkerKinect.stopKinect();
             }
-             * /
+             */
         }
 
         // Specify what you want to happen when the Elapsed event is raised.

@@ -25,8 +25,12 @@ namespace SmartWalkerApplication.Commands.COMConnection
                   {
                      instance = new COMConnection();
                      port = new SerialPort(portName, baudRate);
+                     //port.WriteTimeout = 500;
                      port.Open();
-                     Console.WriteLine("Connection Started.");
+                     if (port.IsOpen)
+                     {
+                         Console.WriteLine("Connection Started.");
+                     }
                   }
                 return instance;
             }
@@ -35,6 +39,11 @@ namespace SmartWalkerApplication.Commands.COMConnection
         public void sendString(string send)
         {
             port.WriteLine(send);
+        }
+
+        public void sendStringWithNoNewLine(string send)
+        {
+            port.Write(send);
         }
 
         public void closeConnection()
