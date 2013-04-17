@@ -20,6 +20,8 @@ namespace SmartWalkerApplication.Commands
 
         private COMConnection.COMConnection port;
 
+        private string myString = "51010";
+
         // Settings for connecting to Arduino
         private const string portName = @"COM8";
         private const int baudRate = 9600;
@@ -35,9 +37,10 @@ namespace SmartWalkerApplication.Commands
         public void start()
         {
             // Start the Kinect Program Piece
-            //startKinect();
+            startKinect();
 
             port = COMConnection.COMConnection.Instance;
+            //walkerKinect = new SmartWalkerKinect();
 
             //int startingDegree = getAverageCurrentLocationInDegrees();
 
@@ -48,14 +51,14 @@ namespace SmartWalkerApplication.Commands
             {
                 //System.Threading.Thread.Sleep(5000);
                 // send mode
-                port.sendString(Console.ReadLine());
-                System.Threading.Thread.Sleep(500);
+                //port.sendString(Console.ReadLine());
+                port.sendString("N");
+                System.Threading.Thread.Sleep(100);
 
-                string myString = Console.ReadLine();
+                //string myString = Console.ReadLine();
                 //System.Threading.Thread.Sleep(500);
 
-                port.sendString(myString);
-                System.Threading.Thread.Sleep(1000);
+                //System.Threading.Thread.Sleep(500);
 
                 //System.Threading.Thread.Sleep(500);
 
@@ -65,24 +68,46 @@ namespace SmartWalkerApplication.Commands
                 // send left ticks
                 //port.sendString(Console.ReadLine());
 
-            }
-            /*
-            while (true)
-            {
                 if (walkerKinect.isEmergency())
                 {
                     Console.WriteLine("STOP, START TURNING!");
+                    pivotRight();
+
                 }
                 else if (walkerKinect.isBlocked())
                 {
                     Console.WriteLine("START TURNING SLOWLY!");
+                    glideRight();
                 }
                 else
                 {
-
+                    Console.WriteLine("KEEP GOING STRAIGHT!");
+                    goStraight();
                 }
+
+                port.sendString(myString);
+
             }
-            */
+
+            //while (true)
+            //{
+            //    if (walkerKinect.isEmergency())
+            //    {
+            //        Console.WriteLine("STOP, START TURNING!");
+            //        swivelRight();
+
+            //    }
+            //    else if (walkerKinect.isBlocked())
+            //    {
+            //        Console.WriteLine("START TURNING SLOWLY!");
+            //        turnRight();
+            //    }
+            //    else
+            //    {
+            //        goStraight();
+            //    }
+            //}
+            
 
          /*   if (!SmartWalkerKinect.isBlocked())
             {
@@ -106,6 +131,35 @@ namespace SmartWalkerApplication.Commands
              * */
             port.closeConnection();
             //port.Close();
+        }
+
+        private void pivotRight()
+        {
+            myString = "11202";
+        }
+
+        private void glideRight()
+        {
+            //Stop motors
+            myString = "11210";
+
+        }
+
+        private void pivotLeft()
+        {
+            myString = "10112";
+        }
+
+        private void glideLeft()
+        {
+            //Stop motors
+            myString = "11012";
+
+        }
+
+        private void goStraight()
+        {
+            myString = "11212";
         }
 
         private int getDegreeAddition(int startDegree, int endDegree)

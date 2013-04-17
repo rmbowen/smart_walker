@@ -47,10 +47,15 @@
   <ItemGroup>
     <Compile Include="Commands\COMConnection\COMConnection.cs" />
     <Compile Include="Commands\CommandParser.cs" />
+    <Compile Include="Commands\HUB\XMLStore.cs" />
     <Compile Include="Commands\Kinect\MainTest.cs" />
     <Compile Include="Commands\Kinect\SmartWalker.cs" />
     <Compile Include="Commands\NavigationCommand.cs" />
     <Compile Include="Commands\ThermalCommand.cs" />
+    <Compile Include="Commands\Vitals\Force.cs" />
+    <Compile Include="Commands\Vitals\HeartRate.cs" />
+    <Compile Include="Commands\Vitals\Strain.cs" />
+    <Compile Include="Commands\Vitals\Thermal.cs" />
     <Compile Include="Commands\WirelessCommand.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -90,7 +90,12 @@ void loop(){
   while(Serial.available() == 0) { }
 
   input = Serial.read();
-
+  
+  while(Serial.available() == 0) { }
+  Serial.read();
+  
+  DataRead:
+  
   switch(input) {
     
     case 'N'://Navigation
@@ -100,10 +105,16 @@ void loop(){
       while(Serial.available() == 0) {}
       //if (Serial.available() > 0) {
       String myString = String(Serial.parseInt());
-      //Serial.print("String Entered ");
-      //Serial.println(myString);Serial1
+      Serial.print("String Entered ");      
+      Serial.println(myString);
       char charBuf[6];
+      
+
       myString.toCharArray(charBuf, 6);
+      
+      for(int i=0; i<6; i++){
+          Serial.print(charBuf[i]);
+      }
       
       //Serial.print("First Num: ");
       //Serial.println(charBuf[0]);
@@ -157,9 +168,13 @@ void loop(){
 
       //RightSpeed = 1750; // 1000 to 1550 is forward
       // LeftSpeed = 1750;  // 1550 to 2000 is reverse
-    
+
+      // Read whatever this thinks is in here???
+      Serial.read();
+      
       while(Serial.available() == 0) {   
  
+          //Serial.print("MOO!");
        // if (rightExpectedTicks == 0) {
          //  myRightMotor.writeMicroseconds(1550);
         //}else {
@@ -170,10 +185,7 @@ void loop(){
          // }else {
         myLeftMotor.writeMicroseconds(LeftSpeed);
          // }
-  
-  
 
-  
         //Enable timers and counters
         starttime = micros();
         endtime = starttime;
@@ -315,7 +327,14 @@ void loop(){
            case 5:
              myRightMotor.writeMicroseconds(1550); //set initial servo position at stop
              myLeftMotor.writeMicroseconds(1550); //set initial servo position at stop
-             break;
+             while(Serial.available() == 0) { }
+
+             input = Serial.read();
+  
+             while(Serial.available() == 0) { }
+             Serial.read();
+             goto DataRead;
+             //break;
           }
        }
        break;

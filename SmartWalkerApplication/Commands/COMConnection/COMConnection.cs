@@ -31,6 +31,7 @@ namespace SmartWalkerApplication.Commands.COMConnection
                      port.Parity = Parity.None;
                      port.Handshake = Handshake.None;
                      port.Open();
+                     
                      if (port.IsOpen)
                      {
                          Console.WriteLine("Connection Started.");

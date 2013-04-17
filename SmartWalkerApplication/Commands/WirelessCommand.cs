@@ -6,6 +6,8 @@ using System.Net.Mail;
 using System.Text;
 using System.Threading.Tasks;
 
+using SmartWalkerApplication.Commands.HUB;
+
 namespace SmartWalkerApplication.Commands
 {
     class WirelessCommand
@@ -21,11 +23,22 @@ namespace SmartWalkerApplication.Commands
                              , string strSubject
                              , string strBody)
         {
+           /* MailMessage mail = new MailMessage(new MailAddress(strFrom), new MailAddress(strTo));
+
+            mail.Subject = strSubject;
+            mail.Body = XMLStore.Instance.getLatestDataAsXML();
+
+            SmtpClient smtpMail = new SmtpClient("smtp.gmail.com");
+            smtpMail.Port = 465;
+            smtpMail.EnableSsl = true;
+            smtpMail.Credentials = new NetworkCredential("thomasdemeo@gmail.com", "Z2t6jv6m8r4.");
+            // and then send the mail
+            */
             var fromAddress = new MailAddress(strFrom);
             var toAddress = new MailAddress(strTo);
             const string fromPassword = "Z2t6jv6m8r4.";
-            const string subject = "Subject";
-            const string body = "Body";
+            string subject = strSubject;
+            string body = XMLStore.Instance.getLatestDataAsXML();
 
             var smtp = new SmtpClient
             {
@@ -42,8 +55,16 @@ namespace SmartWalkerApplication.Commands
                 Body = body
             })
             {
-                smtp.Send(message);
-            }
+             
+                try
+                {
+                    smtp.Send(message);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                }
+           }
         }
     }
 }

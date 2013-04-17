@@ -166,7 +166,7 @@ namespace SmartWalker
 
             FrameRateCount++;
             if (FrameRateCount == FrameRateDivide)
-            {
+            {/*
                 if (kinectUpCount == 0)
                 {
                     sensor.ElevationAngle = 27;
@@ -196,6 +196,7 @@ namespace SmartWalker
                         sensor.ElevationAngle = 0;
                     }
                 }
+              * */
                 FrameRateCount = 0;
 
                 //Bgr32  - Blue, Green, Red, empty byte

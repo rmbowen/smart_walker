@@ -74,7 +74,7 @@ namespace SmartWalkerApplication.Commands
                         invalidCommand = false;
 
                         WirelessCommand wc = new WirelessCommand();
-                        wc.sendEmail("thomasdemeo@gmail.com", "def2191@rit.edu", "High There", "Poop Poop");
+                        wc.sendEmail("thomasdemeo@gmail.com", "thomasdemeo@gmail.com", "Smart Walker Data", null);
                     }
                 }
                 if (invalidCommand) {
