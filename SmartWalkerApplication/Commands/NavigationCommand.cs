@@ -26,6 +26,8 @@ namespace SmartWalkerApplication.Commands
         private const string portName = @"COM8";
         private const int baudRate = 9600;
 
+        private double angle = 0.0;
+
         private int initialDirectionDegree;
 
         public NavigationCommand(int initialDirectionDegree)
@@ -40,55 +42,54 @@ namespace SmartWalkerApplication.Commands
             startKinect();
 
             port = COMConnection.COMConnection.Instance;
-            //walkerKinect = new SmartWalkerKinect();
 
             //int startingDegree = getAverageCurrentLocationInDegrees();
 
             //int degreeDifference = getDegreeAddition(startingDegree, initialDirectionDegree);
 
             //Console.WriteLine("Degree IMU Needs to get to: " + degreeDifference);
+            /*
             while (true)
             {
                 //System.Threading.Thread.Sleep(5000);
                 // send mode
                 //port.sendString(Console.ReadLine());
                 port.sendString("N");
-                System.Threading.Thread.Sleep(100);
+                System.Threading.Thread.Sleep(500);
 
-                //string myString = Console.ReadLine();
-                //System.Threading.Thread.Sleep(500);
-
-                //System.Threading.Thread.Sleep(500);
-
-                //System.Threading.Thread.Sleep(500);
-
+               // string myString = Console.ReadLine();
                 // send right ticks
                // port.sendString(Console.ReadLine());
 
                 // send left ticks
                 //port.sendString(Console.ReadLine());
-
+                
                 if (walkerKinect.isEmergency())
                 {
                     Console.WriteLine("STOP, START TURNING!");
                     pivotRight();
+                    //goStraight();
 
                 }
                 else if (walkerKinect.isBlocked())
                 {
                     Console.WriteLine("START TURNING SLOWLY!");
-                    glideRight();
+                   glideRight();
+                    //goStraight();
+
                 }
                 else
                 {
+
                     Console.WriteLine("KEEP GOING STRAIGHT!");
                     goStraight();
                 }
-
+                
                 port.sendString(myString);
+                System.Threading.Thread.Sleep(500);
 
             }
-
+            */
             //while (true)
             //{
             //    if (walkerKinect.isEmergency())
@@ -135,32 +136,32 @@ namespace SmartWalkerApplication.Commands
 
         private void pivotRight()
         {
-            myString = "11202";
+            myString = "11302";
         }
 
         private void glideRight()
         {
             //Stop motors
-            myString = "11210";
+            myString = "11304";
 
         }
 
         private void pivotLeft()
         {
-            myString = "10112";
+            myString = "10612";
         }
 
         private void glideLeft()
         {
             //Stop motors
-            myString = "11012";
+            myString = "10812";
 
         }
 
         private void goStraight()
         {
-            myString = "11212";
-        }
+            myString = "11111";
+        } 
 
         private int getDegreeAddition(int startDegree, int endDegree)
         {
@@ -197,14 +198,15 @@ namespace SmartWalkerApplication.Commands
             walkerKinect = new SmartWalkerKinect();
 
             walkerKinect.startKinect();
-            /*
+
+            
             System.Timers.Timer aTimer = new System.Timers.Timer();
             aTimer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
             // Set the Interval to 10 seconds.
             aTimer.Interval = 10000;
             aTimer.Enabled = true;
-            while (endProgram) { }
-             * */
+            //while (endProgram) { }
+            
             Console.WriteLine("Kinect is Waiting:");
             /*if (Console.ReadLine() != null)
             {
@@ -218,7 +220,10 @@ namespace SmartWalkerApplication.Commands
         private void OnTimedEvent(object source, ElapsedEventArgs e)
         {
             walkerKinect.printMap();
-            walkerKinect.stopKinect();
+            angle += 45;
+            Console.WriteLine("New Angle: " + angle );
+            walkerKinect.setAngle(angle);
+            //walkerKinect.stopKinect();
             //endProgram = true;
         }
 

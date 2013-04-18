@@ -16,11 +16,11 @@ namespace SmartWalker
     public class SmartWalkerKinect
     {
         const double walkerHeight = 38.0 * 2.54 * 10.0; // convert value from inches to millimeters
-        const double walkerWidth = 25.0 * 2.54 * 10.0;
+        const double walkerWidth = 27.0 * 2.54 * 10.0;
         const double kinectHeight = 19.0 * 2.54 * 10.0;
-        const int obstacleThreshold = 1100;
+        const int obstacleThreshold = 1850;
         const int mapThreshold = 2000;
-        const int emergencyThreshold = 800;
+        const int emergencyThreshold = 1100;
 
         static KinectSensor sensor;
 
@@ -36,10 +36,6 @@ namespace SmartWalker
         double angle = 0.0;
         double xPos = 0.0;
         double yPos = 0.0;
-
-        double localAngle = 0.0;
-        double localxPos = 0.0;
-        double localyPos = 0.0;
 
         double thetaHFull = 0.0;
         double thetaH = 0.0;
@@ -166,7 +162,8 @@ namespace SmartWalker
 
             FrameRateCount++;
             if (FrameRateCount == FrameRateDivide)
-            {/*
+            {
+                /*
                 if (kinectUpCount == 0)
                 {
                     sensor.ElevationAngle = 27;
@@ -192,11 +189,11 @@ namespace SmartWalker
                     else if (kinectIsLevel == false)
                     {
                         kinectisDown = false;
+                        sensor.ElevationAngle = 9;
                         kinectIsLevel = true;
-                        sensor.ElevationAngle = 0;
                     }
                 }
-              * */
+             */
                 FrameRateCount = 0;
 
                 //Bgr32  - Blue, Green, Red, empty byte
@@ -813,6 +810,15 @@ namespace SmartWalker
             return emergencyBlocked;
         }
 
+        public void setAngle(double newAngle)
+        {
+            angle = (newAngle / 180) * Math.PI;
+        }
+
+        public bool isKinectLevel()
+        {
+            return kinectIsLevel;
+        }
 
         public void printMap()
         {
@@ -860,7 +866,7 @@ namespace SmartWalker
                 }
             }
 
-            using (System.IO.StreamWriter file = new System.IO.StreamWriter(@"C:\Users\Steve\Desktop\maps\mapTest1.txt"))
+            using (System.IO.StreamWriter file = new System.IO.StreamWriter(@"C:\Users\tjd9961\Desktop\Kinect\mapTest1.txt"))
             {
                 if ((topPixel == bottomPixel) || (leftPixel == rightPixel) || (leftPixel == -1) || (rightPixel == -1) || (topPixel == -1) || (bottomPixel == -1))
                 {
@@ -900,7 +906,7 @@ namespace SmartWalker
                     }
                 }
             }
-            using (System.IO.StreamWriter file = new System.IO.StreamWriter(@"C:\Users\Steve\Desktop\maps\mapTest2.txt"))
+            using (System.IO.StreamWriter file = new System.IO.StreamWriter(@"C:\Users\tjd9961\Desktop\Kinect\mapTest2.txt"))
             {
                 if ((topPixel == bottomPixel) || (leftPixel == rightPixel) || (leftPixel == -1) || (rightPixel == -1) || (topPixel == -1) || (bottomPixel == -1))
                 {
@@ -942,9 +948,5 @@ namespace SmartWalker
             }
         }
 
-        public static void setAngle(int newAngle)
-        {
-
-        }
     }
 }
