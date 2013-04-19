@@ -91,11 +91,6 @@ namespace SmartWalker
 
             // Start the sensor
             sensor.Start();
-            //kinectSensorChooser1.Kinect.ElevationAngle = 27;
-            //System.Threading.Thread.Sleep(new TimeSpan(hours: 0, minutes: 0, seconds: 2));
-            //kinectSensorChooser1.Kinect.ElevationAngle = -27;
-            //System.Threading.Thread.Sleep(new TimeSpan(hours: 0, minutes: 0, seconds: 2));
-            //kinectSensorChooser1.Kinect.ElevationAngle = 0;
 
         }
 
@@ -818,6 +813,34 @@ namespace SmartWalker
         public bool isKinectLevel()
         {
             return kinectIsLevel;
+        }
+
+        public bool isRightTurnBetter()
+        {
+            int i = 0;
+            int rightCount = 0;
+            int leftCount = 0;
+
+            for (i = 0; i < 320; i++)
+            {
+                if (columnMins[i, 0] == 1)
+                {
+                    if (i < 160)
+                    {
+                        leftCount++;
+                    }
+                    else
+                    {
+                        rightCount++;
+                    }
+                }
+            }
+
+            if (leftCount > rightCount)
+            {
+                return false;
+            }
+            return true;
         }
 
         public void printMap()
