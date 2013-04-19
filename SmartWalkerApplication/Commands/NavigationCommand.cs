@@ -43,12 +43,23 @@ namespace SmartWalkerApplication.Commands
 
             port = COMConnection.COMConnection.Instance;
 
-            //int startingDegree = getAverageCurrentLocationInDegrees();
+            int startingDegree = getAverageCurrentLocationInDegrees();
+            int degreeDifference = getDegreeAddition(startingDegree, initialDirectionDegree);
 
-            //int degreeDifference = getDegreeAddition(startingDegree, initialDirectionDegree);
+            Console.WriteLine("Degree IMU Needs to get to: " + degreeDifference);
 
-            //Console.WriteLine("Degree IMU Needs to get to: " + degreeDifference);
-            /*
+            port.sendString("N");
+            port.sendString("30707");
+
+            while (startingDegree != degreeDifference)
+            {
+                startingDegree = getAverageCurrentLocationInDegrees();
+                Console.WriteLine("New Degree: " + startingDegree);
+            }
+
+            port.sendString("N");
+            port.sendString("51010");
+            
             while (true)
             {
                 //System.Threading.Thread.Sleep(5000);
@@ -89,7 +100,7 @@ namespace SmartWalkerApplication.Commands
                 System.Threading.Thread.Sleep(500);
 
             }
-            */
+            
             //while (true)
             //{
             //    if (walkerKinect.isEmergency())
@@ -199,14 +210,14 @@ namespace SmartWalkerApplication.Commands
 
             walkerKinect.startKinect();
 
-            
+            /*
             System.Timers.Timer aTimer = new System.Timers.Timer();
             aTimer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
             // Set the Interval to 10 seconds.
             aTimer.Interval = 10000;
             aTimer.Enabled = true;
             //while (endProgram) { }
-            
+            */
             Console.WriteLine("Kinect is Waiting:");
             /*if (Console.ReadLine() != null)
             {

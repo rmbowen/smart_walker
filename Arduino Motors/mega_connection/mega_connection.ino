@@ -47,6 +47,7 @@ unsigned long endtime;
 void setup(){
   Serial.begin(9600); //Set baud rate to 9600
 
+  analogReference(DEFAULT);
   
   myRightMotor.writeMicroseconds(1550); //set initial servo position at stop
   myRightMotor.attach(myRightMotorPin);  //the pin for the servo control 
@@ -336,6 +337,50 @@ void loop(){
               }
             }
             break;
+            case 3:
+                rightExpectedTicks = rightExpectedTicks;
+                leftExpectedTicks = -leftExpectedTicks;
+                //Check the actual speeds of the motors
+                if(RightEncoderCountinLastSecond == rightExpectedTicks){
+                  /*Serial.print("RMG"); //right motor good
+                  Serial.print("\t");*/
+                } 
+                else if(RightEncoderCountinLastSecond > rightExpectedTicks) //if moving too slow
+                  {
+                  if(RightSpeed > (maxForwardSpeed)){
+                    RightSpeed = RightSpeed--; //increase motor power
+                    /*Serial.print(RightSpeed);
+                    Serial.print("\t");*/
+                  }
+                  } 
+                else if(RightEncoderCountinLastSecond < rightExpectedTicks)
+                {
+                  if(RightSpeed < (minForwardSpeed)){
+                    RightSpeed = RightSpeed++;//decrease motor power only if max speed hasn't been approached
+                    /*Serial.print(RightSpeed);
+                    Serial.print("\t");*/
+                  }
+                }
+          
+                if(LeftEncoderCountinLastSecond == leftExpectedTicks){
+                  /*Serial.print("LMG"); //left motor good
+                  Serial.println("");*/
+                } 
+                else if(LeftEncoderCountinLastSecond < leftExpectedTicks){
+                  if(LeftSpeed > (maxForwardSpeed)){
+                    LeftSpeed = LeftSpeed++; //reduce motor power
+                    /*Serial.print(LeftSpeed);
+                    Serial.println("");*/
+                  }
+                } 
+                else if(LeftEncoderCountinLastSecond > leftExpectedTicks){
+                  if(LeftSpeed < (minForwardSpeed)){
+                    LeftSpeed = LeftSpeed--;    //increase motor power
+                    /*Serial.print(LeftSpeed);
+                    Serial.println("");*/
+                  }
+                }
+           break;
            case 5:
              myRightMotor.writeMicroseconds(1550); //set initial servo position at stop
              myLeftMotor.writeMicroseconds(1550); //set initial servo position at stop
@@ -349,7 +394,7 @@ void loop(){
              //break;
           }
        }
-       break;
+       break;   
     }
 
 } //end of main loop
