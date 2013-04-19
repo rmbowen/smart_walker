@@ -10,7 +10,6 @@ using System.Windows.Input;
 //using System.Windows.Media.Imaging;
 using Microsoft.Kinect;
 using System.Diagnostics; 
-
 namespace SmartWalker
 {
     public class SmartWalkerKinect
@@ -832,11 +831,20 @@ namespace SmartWalker
             return kinectIsLevel;
         }
 
+        //This method returns true if it decides that a right turn would 
+        //   be safer than a left turn. This method returns false if a 
+        //   left turn will be safer.
+        //The minimum distance to obstacles in each column is calculated 
+        //   for the left side and for the right side. The side that has
+        //   the highest average distance to obstacles will be the correct 
+        //   direction to turn
         public bool isRightTurnBetter()
         {
             int i = 0;
             int rightCount = 0;
+            int rightDistanceCount = 0;
             int leftCount = 0;
+            int leftDistanceCount = 0;
 
             for (i = 0; i < 320; i++)
             {
@@ -845,15 +853,17 @@ namespace SmartWalker
                     if (i < 160)
                     {
                         leftCount++;
+                        leftDistanceCount += columnMins[i,1];
                     }
                     else
                     {
                         rightCount++;
+                        rightDistanceCount += columnMins[i,1];
                     }
                 }
             }
 
-            if (leftCount > rightCount)
+            if ((leftDistanceCount / leftCount) > (rightDistanceCount / rightCount))
             {
                 return false;
             }
