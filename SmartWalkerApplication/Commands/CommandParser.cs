@@ -52,6 +52,9 @@ namespace SmartWalkerApplication.Commands
                     {
                         Console.WriteLine("Force Command Entered");
                         invalidCommand = false;
+
+                        ForceCommand fc = new ForceCommand();
+                        fc.start();
                     }
                 }
                 else if (words[0].Equals("Thermal"))
