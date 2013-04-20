@@ -39,26 +39,37 @@ namespace SmartWalkerApplication.Commands
         public void start()
         {
             // Start the Kinect Program Piece
-            startKinect();
+            //startKinect();
 
             port = COMConnection.COMConnection.Instance;
-
+            
+            
             int startingDegree = getAverageCurrentLocationInDegrees();
             int degreeDifference = getDegreeAddition(startingDegree, initialDirectionDegree);
 
             Console.WriteLine("Degree IMU Needs to get to: " + degreeDifference);
+            
+            // Start dat swivel
 
             port.sendString("N");
             port.sendString("30707");
-
-            while (startingDegree != degreeDifference)
+            System.Threading.Thread.Sleep(500); // Let the wheels get going
+            
+            while (startingDegree <= degreeDifference)
             {
                 startingDegree = getAverageCurrentLocationInDegrees();
                 Console.WriteLine("New Degree: " + startingDegree);
             }
-
+            
+            // Stop, wait 1 second, start moving
             port.sendString("N");
             port.sendString("51010");
+            System.Threading.Thread.Sleep(500); // Let the wheels get going
+
+            // Go Forward
+            /*
+            port.sendString("N");
+            port.sendString("11010");
             
             while (true)
             {
@@ -100,7 +111,7 @@ namespace SmartWalkerApplication.Commands
                 System.Threading.Thread.Sleep(500);
 
             }
-            
+            */
             //while (true)
             //{
             //    if (walkerKinect.isEmergency())
@@ -198,9 +209,18 @@ namespace SmartWalkerApplication.Commands
         {
             port.sendString("D");
              //Delay a bit for the serial to catch up
-            System.Threading.Thread.Sleep(200);
-
-            int degree = int.Parse(port.readLineString());
+            System.Threading.Thread.Sleep(100);
+            string degreeString = port.readLineString();
+            Console.WriteLine("Recieved Value: " + degreeString);
+            int degree = 0;
+            try
+            {
+                degree = int.Parse(degreeString);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Exception: " + e);
+            }
             return degree;
         }
 

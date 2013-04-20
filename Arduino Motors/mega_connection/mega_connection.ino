@@ -2,6 +2,8 @@
 
 String readString;
 #include <Servo.h> 
+#include <Wire.h>
+#include <LSM303.h>
 Servo myRightMotor;  // create servo object to control a servo 
 Servo myLeftMotor;
 
@@ -32,6 +34,7 @@ int maxForwardSpeed = 900;
 int minForwardSpeed = 1400;
 int motorDirection; // 1 for forward, 0 for reverse
 
+boolean firstTime = true;
 
 int RightEncoderCHA_PreviousVal; //Previous value of encoder to check if there was a change
 int LeftEncoderCHA_PreviousVal;
@@ -43,6 +46,7 @@ int loopcount = 0;
 unsigned long starttime;
 unsigned long endtime;
 
+LSM303 compass;
 
 void setup(){
   Serial.begin(9600); //Set baud rate to 9600
@@ -69,6 +73,14 @@ void setup(){
   //motorDirection = 0; // 1 for forward, 0 for reverse
   RightSpeed = 1750; // 1000 to 1550 is forward
   LeftSpeed = 1750;  // 1550 to 2000 is reverse
+  
+  Wire.begin();
+  compass.init();
+  compass.enableDefault();
+  
+  // Calibration values for compass. Change these if IMU moves its position
+  compass.m_min.x = -697; compass.m_min.y = -628; compass.m_min.z = -693;
+  compass.m_max.x = +570; compass.m_max.y = +616; compass.m_max.z = 517;
   
   //myRightMotor.writeMicroseconds(RightSpeed); //set initial servo position at stop
   //myRightMotor.attach(13);  //the pin for the servo control 
@@ -109,6 +121,13 @@ void loop(){
       sensorValue = analogRead(A5);
       //printDouble(sensorValue, 1000);
       Serial.println(sensorValue);
+      break;
+    case 'D': // Current Degrees of Walker
+
+      compass.read();
+      int heading;
+      heading = compass.heading((LSM303::vector){0,-1,0});
+      Serial.println(heading);
       break;
     
     case 'N'://Navigation
@@ -191,12 +210,7 @@ void loop(){
        // if (rightExpectedTicks == 0) {
          //  myRightMotor.writeMicroseconds(1550);
         //}else {
-        myRightMotor.writeMicroseconds(RightSpeed);
-         // }
-         // if (leftExpectedTicks == 0) {
-         //    myLeftMotor.writeMicroseconds(1550); 
-         // }else {
-        myLeftMotor.writeMicroseconds(LeftSpeed);
+        
          // }
 
         //Enable timers and counters
@@ -337,50 +351,59 @@ void loop(){
               }
             }
             break;
-            case 3:
-                rightExpectedTicks = rightExpectedTicks;
-                leftExpectedTicks = -leftExpectedTicks;
-                //Check the actual speeds of the motors
-                if(RightEncoderCountinLastSecond == rightExpectedTicks){
-                  /*Serial.print("RMG"); //right motor good
-                  Serial.print("\t");*/
-                } 
-                else if(RightEncoderCountinLastSecond > rightExpectedTicks) //if moving too slow
-                  {
-                  if(RightSpeed > (maxForwardSpeed)){
-                    RightSpeed = RightSpeed--; //increase motor power
-                    /*Serial.print(RightSpeed);
-                    Serial.print("\t");*/
-                  }
-                  } 
-                else if(RightEncoderCountinLastSecond < rightExpectedTicks)
-                {
-                  if(RightSpeed < (minForwardSpeed)){
-                    RightSpeed = RightSpeed++;//decrease motor power only if max speed hasn't been approached
-                    /*Serial.print(RightSpeed);
-                    Serial.print("\t");*/
-                  }
-                }
-          
-                if(LeftEncoderCountinLastSecond == leftExpectedTicks){
-                  /*Serial.print("LMG"); //left motor good
-                  Serial.println("");*/
-                } 
-                else if(LeftEncoderCountinLastSecond < leftExpectedTicks){
-                  if(LeftSpeed > (maxForwardSpeed)){
-                    LeftSpeed = LeftSpeed++; //reduce motor power
-                    /*Serial.print(LeftSpeed);
-                    Serial.println("");*/
-                  }
-                } 
-                else if(LeftEncoderCountinLastSecond > leftExpectedTicks){
-                  if(LeftSpeed < (minForwardSpeed)){
-                    LeftSpeed = LeftSpeed--;    //increase motor power
-                    /*Serial.print(LeftSpeed);
-                    Serial.println("");*/
-                  }
-                }
-           break;
+           case 3:
+          if (firstTime) {
+                  LeftSpeed -= 500;
+                  firstTime = false;
+                  rightExpectedTicks = rightExpectedTicks;
+                  leftExpectedTicks = -leftExpectedTicks;
+                  RightSpeed = 1390;
+                  LeftSpeed = 1680;
+           }
+           
+            //Check the actual speeds of the motors
+            /*
+            if(RightEncoderCountinLastSecond == rightExpectedTicks){
+              /*Serial.print("RMG"); //right motor good
+              Serial.print("\t");
+            } 
+            else if(RightEncoderCountinLastSecond > rightExpectedTicks) //if moving too slow
+              {
+              if(RightSpeed > (maxForwardSpeed)){
+                RightSpeed = RightSpeed--; //increase motor power
+                //Serial.print(RightSpeed);
+                //Serial.print("\t");
+              }
+              } 
+            else if(RightEncoderCountinLastSecond < rightExpectedTicks)
+            {
+              if(RightSpeed < (minForwardSpeed)){
+                RightSpeed = RightSpeed++;//decrease motor power only if max speed hasn't been approached
+                //Serial.print(RightSpeed);
+                //Serial.print("\t");
+              }
+            }
+      
+            if(LeftEncoderCountinLastSecond == leftExpectedTicks){
+              ///Serial.print("LMG"); //left motor good
+//Serial.println("");
+            } 
+            else if(LeftEncoderCountinLastSecond < leftExpectedTicks){
+              if(LeftSpeed > (maxForwardSpeed)){
+                LeftSpeed = LeftSpeed++; //reduce motor power
+                //Serial.print(LeftSpeed);
+                //Serial.println("");
+              }
+            } 
+            else if(LeftEncoderCountinLastSecond > leftExpectedTicks){
+              if(LeftSpeed < (minForwardSpeed)){
+                LeftSpeed = LeftSpeed--;    //increase motor power
+                //Serial.print(LeftSpeed);
+                //Serial.println("");
+              }
+            }
+            */
+            break;
            case 5:
              myRightMotor.writeMicroseconds(1550); //set initial servo position at stop
              myLeftMotor.writeMicroseconds(1550); //set initial servo position at stop
@@ -393,6 +416,8 @@ void loop(){
              goto DataRead;
              //break;
           }
+          myRightMotor.writeMicroseconds(RightSpeed);
+          myLeftMotor.writeMicroseconds(LeftSpeed);
        }
        break;   
     }
