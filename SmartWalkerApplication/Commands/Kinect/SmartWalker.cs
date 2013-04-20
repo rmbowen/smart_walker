@@ -15,7 +15,7 @@ namespace SmartWalker
     public class SmartWalkerKinect
     {
         // convert value from inches to millimeters
-        const double walkerHeight = 38.0 * 2.54 * 10.0; // Height of the walker - 38 inches
+        const double walkerHeight = 39.0 * 2.54 * 10.0; // Height of the walker - 38 inches
         const double walkerWidth = 27.0 * 2.54 * 10.0;// Width of the walker - 25 inches (added two inches to give wlaker more space)
         const double kinectHeight = 19.0 * 2.54 * 10.0; // Height of the Kinect camera from the ground - 19 inches
 
@@ -71,6 +71,9 @@ namespace SmartWalker
         const float MaxDepthDistance = 4095; // max value returned
         const float MinDepthDistance = 850; // min value returned
         const float MaxDepthDistanceOffset = MaxDepthDistance - MinDepthDistance;
+
+        int levelPositionAngle = 9;
+        double levelPositionAngleDouble = 9.0;
 
         public SmartWalkerKinect()
         {
@@ -192,7 +195,7 @@ namespace SmartWalker
                     else if (kinectIsLevel == false)
                     {
                         kinectisDown = false;
-                        sensor.ElevationAngle = 9; //Set the Kinect to 9 degrees, its level position
+                        sensor.ElevationAngle = levelPositionAngle; //Set the Kinect to 9 degrees, its level position
                         kinectIsLevel = true;
                     }
                 }
@@ -316,10 +319,10 @@ namespace SmartWalker
                     }
 
                     //If the Kinect is not level
-                    if (kinectIsUp || kinectisDown)
-                    {
-                        thetaV += 21.5;
-                    }
+                    //if (kinectIsUp || kinectisDown)
+                    //{
+                    //    thetaV += (21.5 / 180.0 * Math.PI);
+                    //}
 
                     //If the pixel is withing the emergency threshold
                     if (depth <= emergencyThreshold && depth >= 0 && allFramesInitialized)
@@ -328,7 +331,7 @@ namespace SmartWalker
                         if ((depth * Math.Sin(thetaH)) < (walkerWidth / 2.0))
                         {
                             //If the pixel is within the height of the walker
-                            if (((rowCounter < 120) && ((depth * Math.Sin(thetaV)) < (walkerHeight - kinectHeight))) || ((rowCounter >= 120) && ((depth * Math.Sin(thetaV)) < (kinectHeight))))
+                            if (((rowCounter < 120) && ((depth * Math.Sin((thetaV + (levelPositionAngleDouble / 180 * Math.PI)))) < (walkerHeight - kinectHeight))) || (rowCounter >= 120))
                             {
                                 if (columnCounter != 0 && rowCounter != 0)
                                 {
@@ -467,7 +470,7 @@ namespace SmartWalker
                         }
 
                         //we are very close
-                        if ((((rowCounter < 120) && ((depth * Math.Sin(thetaV)) < (walkerHeight - kinectHeight))) || ((rowCounter >= 120) && ((depth * Math.Sin(thetaV)) < (kinectHeight - 19.0)))) && ((depth * Math.Sin(thetaH)) < (walkerWidth / 2.0)))
+                        if (((rowCounter < 120) && ((depth * Math.Sin((thetaV + (levelPositionAngleDouble / 180 * Math.PI)))) < (walkerHeight - kinectHeight))) || (rowCounter >= 120))
                         {
                             pixels[colorIndex + BlueIndex] = 255;
                             pixels[colorIndex + GreenIndex] = 0;
@@ -487,7 +490,7 @@ namespace SmartWalker
                     {
                         if ((depth * Math.Sin(thetaH)) < (walkerWidth / 2.0))
                         {
-                            if (((rowCounter < 120) && ((depth * Math.Sin(thetaV)) < (walkerHeight - kinectHeight))) || ((rowCounter >= 120) && ((depth * Math.Sin(thetaV)) < (kinectHeight))))
+                            if (((rowCounter < 120) && ((depth * Math.Sin((thetaV + (levelPositionAngleDouble / 180 * Math.PI)))) < (walkerHeight - kinectHeight))) || (rowCounter >= 120))
                             {
                                 if (columnCounter != 0 && rowCounter != 0)
                                 {
@@ -630,7 +633,7 @@ namespace SmartWalker
                         }
 
                         //we are very close
-                        if ((((rowCounter < 120) && ((depth * Math.Sin(thetaV)) < (walkerHeight - kinectHeight))) || ((rowCounter >= 120) && ((depth * Math.Sin(thetaV)) < (kinectHeight - 19.0)))) && ((depth * Math.Sin(thetaH)) < (walkerWidth / 2.0)))
+                        if (((rowCounter < 120) && ((depth * Math.Sin((thetaV + (levelPositionAngleDouble / 180 * Math.PI)))) < (walkerHeight - kinectHeight))) || (rowCounter >= 120))
                         {
                             pixels[colorIndex + BlueIndex] = 0;
                             pixels[colorIndex + GreenIndex] = 255;
