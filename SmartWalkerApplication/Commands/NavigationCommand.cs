@@ -39,11 +39,11 @@ namespace SmartWalkerApplication.Commands
         public void start()
         {
             // Start the Kinect Program Piece
-            //startKinect();
+            startKinect();
 
             port = COMConnection.COMConnection.Instance;
             
-            
+            /*
             int startingDegree = getAverageCurrentLocationInDegrees();
             int degreeDifference = getDegreeAddition(startingDegree, initialDirectionDegree);
 
@@ -65,19 +65,22 @@ namespace SmartWalkerApplication.Commands
             port.sendString("N");
             port.sendString("51010");
             System.Threading.Thread.Sleep(500); // Let the wheels get going
-
+            */
             // Go Forward
-            /*
-            port.sendString("N");
-            port.sendString("11010");
             
+            //port.sendString("N");
+            //port.sendString("11010");
+            //System.Threading.Thread.Sleep(500);
+
             while (true)
             {
                 //System.Threading.Thread.Sleep(5000);
                 // send mode
                 //port.sendString(Console.ReadLine());
+
                 port.sendString("N");
-                System.Threading.Thread.Sleep(500);
+
+                //System.Threading.Thread.Sleep(500);
 
                // string myString = Console.ReadLine();
                 // send right ticks
@@ -88,16 +91,74 @@ namespace SmartWalkerApplication.Commands
                 
                 if (walkerKinect.isEmergency())
                 {
-                    Console.WriteLine("STOP, START TURNING!");
-                    pivotRight();
+                    int turnResult = walkerKinect.isRightTurnBetter();
+                    switch (turnResult)
+                    {
+                        case 1:
+                            Console.WriteLine("Go Straight Slowly...");
+                            goStraightSlowly();
+                            break;
+                        case 2:
+                            Console.WriteLine("Stop, start turning LEFT!");
+                            pivotLeft();
+                            break;
+                        case 3:
+                            Console.WriteLine("Stop, start turning RIGHT!");
+                            pivotRight();
+                            break;
+                        default:
+                            Console.WriteLine("SWIVEL!");
+                            myString = "50909";
+                            break;
+                    }
+                    //if (walkerKinect.isRightTurnBetter())
+                    //{
+                    //    Console.WriteLine("Stop, start turning RIGHT!");
+
+                    //    pivotRight();
+                    //}
+                    //else
+                    //{
+                    //    Console.WriteLine("Stop, start turning Left!");
+
+                    //    pivotLeft();
+                    //}
                     //goStraight();
 
                 }
                 else if (walkerKinect.isBlocked())
                 {
-                    Console.WriteLine("START TURNING SLOWLY!");
-                   glideRight();
-                    //goStraight();
+                    int turnResult = walkerKinect.isRightTurnBetter();
+                    switch (turnResult)
+                    {
+                        case 1:
+                            Console.WriteLine("Go Straight Slowly...");
+                            goStraightSlowly();
+                            break;
+                        case 2:
+                            Console.WriteLine("Start turning slowly LEFT!");
+                            glideLeft();
+                            break;
+                        case 3:
+                            Console.WriteLine("Start turning slowly RIGHT!");
+                            glideRight();
+                            break;
+                        default:
+                            Console.WriteLine("SWIVEL!");
+                            myString = "50909";
+                            break;
+                    }
+                    //if (walkerKinect.isRightTurnBetter())
+                    //{
+                    //    Console.WriteLine("Start turning slowly RIGHT!");
+                    //    glideRight();
+                    //}
+                    //else
+                    //{
+                    //    Console.WriteLine("Start turning slowly LEFT!");
+
+                    //    glideLeft();
+                    //}
 
                 }
                 else
@@ -111,7 +172,7 @@ namespace SmartWalkerApplication.Commands
                 System.Threading.Thread.Sleep(500);
 
             }
-            */
+            
             //while (true)
             //{
             //    if (walkerKinect.isEmergency())
@@ -158,31 +219,36 @@ namespace SmartWalkerApplication.Commands
 
         private void pivotRight()
         {
-            myString = "11302";
+            myString = "11305";
         }
 
         private void glideRight()
         {
             //Stop motors
-            myString = "11304";
+            myString = "11307";
 
         }
 
         private void pivotLeft()
         {
-            myString = "10612";
+            myString = "10512";
         }
 
         private void glideLeft()
         {
             //Stop motors
-            myString = "10812";
+            myString = "10712";
 
         }
 
         private void goStraight()
         {
-            myString = "11111";
+            myString = "10909";
+        }
+
+        private void goStraightSlowly()
+        {
+            myString = "10707";
         } 
 
         private int getDegreeAddition(int startDegree, int endDegree)

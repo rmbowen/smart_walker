@@ -34,6 +34,7 @@ namespace SmartWalker
 
         // Shows which columns of the frame are blocked (0 = free, 1 = blocked), and the minimum obstacle depth in each column
         int[,] columnMins = new int[320, 2];
+        int[,] columnMinsCopy = new int[320, 2];
 
         double xStartIndex = 1000.0; // Starting X index in map (middle of map)
         double yStartIndex = 1000.0; // Starting Y index in map (middle of map)
@@ -46,8 +47,8 @@ namespace SmartWalker
         double thetaH = 0.0; // Horizontal angle from center to current pixel (0 to 28.5 degrees)
         double thetaV = 0.0;  // Vertical angle from center to current pixel (0 to 21.5 degrees)
 
-        int FrameRateDivide = 3; // How much to divide the default 30 fps rate by
-        int FrameRateCount = 2; // FrameRateDivide - 1, so that the first frame will be used
+        int FrameRateDivide = 2; // How much to divide the default 30 fps rate by
+        int FrameRateCount = 1; // FrameRateDivide - 1, so that the first frame will be used
         Byte[] pixelsCopy; // This will replicate the most recent accepted frames in place of the frames that are dropped
 
         //These are used to save the 4 most previous frames, because something seen by the 
@@ -199,7 +200,7 @@ namespace SmartWalker
                         kinectIsLevel = true;
                     }
                 }
-             */
+                */
                 FrameRateCount = 0;
 
                 //Bgr32  - Blue, Green, Red, empty byte
@@ -252,6 +253,7 @@ namespace SmartWalker
                         else
                         {
                             rowCounter = 0;
+                            columnMinsCopy = columnMins;
                             columnMins = new int[320, 2];
 
                             //If the frame is blocked, set the appropriate global variables
@@ -841,36 +843,97 @@ namespace SmartWalker
         //   for the left side and for the right side. The side that has
         //   the highest average distance to obstacles will be the correct 
         //   direction to turn
-        public bool isRightTurnBetter()
+        public int isRightTurnBetter()
         {
             int i = 0;
-            int rightCount = 0;
+            int rightCount = 1;
             int rightDistanceCount = 0;
-            int leftCount = 0;
+            int leftCount = 1;
             int leftDistanceCount = 0;
+            int leftMin = -1;
+            int rightMin = -1;
+            bool centerIsBlocked = false;
+            bool leftIsBlocked = false;
+            bool rightIsBlocked = false;
 
             for (i = 0; i < 320; i++)
             {
-                if (columnMins[i, 0] == 1)
+                if (columnMinsCopy[i, 0] == 1)
                 {
-                    if (i < 160)
+                    if (i < 80)
                     {
-                        leftCount++;
-                        leftDistanceCount += columnMins[i,1];
+                        if (columnMinsCopy[i,1] < 1000){
+                            leftIsBlocked = true;
+                        }
+                    }
+                    else if (i < 240)
+                    {
+                        if (columnMinsCopy[i, 1] < 1000)
+                        {
+                            centerIsBlocked = true;
+                        }
                     }
                     else
                     {
-                        rightCount++;
-                        rightDistanceCount += columnMins[i,1];
+                        if (columnMinsCopy[i,1] < 1000){
+                            rightIsBlocked = true;
+                        }
                     }
+
+                    //if (i < 160)
+                    //{
+                        //if (leftMin == -1)
+                        //{
+                        //    leftMin = columnMinsCopy[i, 1];
+                        //}
+                        //else if (columnMinsCopy[i, 1] < leftMin)
+                        //{
+                        //    leftMin = columnMinsCopy[i, 1];
+                        //}
+                    //    leftCount++;
+                    //    leftDistanceCount += columnMinsCopy[i,1];
+                    //}
+                    //else
+                    //{
+                        //if (rightMin == -1)
+                        //{
+                        //    rightMin = columnMinsCopy[i, 1];
+                        //}
+                        //else if (columnMinsCopy[i, 1] < rightMin)
+                        //{
+                        //    rightMin = columnMinsCopy[i, 1];
+                        //}
+                    //    rightCount++;
+                    //    rightDistanceCount += columnMinsCopy[i,1];
+                    //}
                 }
             }
-
-            if ((leftDistanceCount / leftCount) > (rightDistanceCount / rightCount))
+            if (!centerIsBlocked)
             {
-                return false;
+                return 1;
             }
-            return true;
+            else if (!leftIsBlocked)
+            {
+                return 3;
+            }
+            else if (!rightIsBlocked)
+            {
+                return 2;
+            }
+            else
+            {
+                return 4;
+            }
+
+            //if (leftCount != 0 || rightCount != 0)
+            //{
+                //if ((leftDistanceCount / (leftCount)) > (rightDistanceCount / (rightCount)))
+            //if(leftMin < rightMin)
+            //    {
+            //        return false;
+            //    }
+            //}
+            //return true;
         }
 
         //Print the map to a file

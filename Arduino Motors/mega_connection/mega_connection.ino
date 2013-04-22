@@ -357,20 +357,20 @@ void loop(){
                   firstTime = false;
                   rightExpectedTicks = rightExpectedTicks;
                   leftExpectedTicks = -leftExpectedTicks;
-                  RightSpeed = 1390;
-                  LeftSpeed = 1680;
+                  
            }
-           
+           LeftSpeed = 1390;
+                  RightSpeed = 1680;
             //Check the actual speeds of the motors
             /*
             if(RightEncoderCountinLastSecond == rightExpectedTicks){
-              /*Serial.print("RMG"); //right motor good
-              Serial.print("\t");
+              //Serial.print("RMG"); //right motor good
+              //Serial.print("\t");
             } 
             else if(RightEncoderCountinLastSecond > rightExpectedTicks) //if moving too slow
               {
               if(RightSpeed > (maxForwardSpeed)){
-                RightSpeed = RightSpeed--; //increase motor power
+                //RightSpeed = RightSpeed--; //increase motor power
                 //Serial.print(RightSpeed);
                 //Serial.print("\t");
               }
@@ -378,7 +378,7 @@ void loop(){
             else if(RightEncoderCountinLastSecond < rightExpectedTicks)
             {
               if(RightSpeed < (minForwardSpeed)){
-                RightSpeed = RightSpeed++;//decrease motor power only if max speed hasn't been approached
+               // RightSpeed = RightSpeed++;//decrease motor power only if max speed hasn't been approached
                 //Serial.print(RightSpeed);
                 //Serial.print("\t");
               }
@@ -390,14 +390,14 @@ void loop(){
             } 
             else if(LeftEncoderCountinLastSecond < leftExpectedTicks){
               if(LeftSpeed > (maxForwardSpeed)){
-                LeftSpeed = LeftSpeed++; //reduce motor power
+               // LeftSpeed = LeftSpeed++; //reduce motor power
                 //Serial.print(LeftSpeed);
                 //Serial.println("");
               }
             } 
             else if(LeftEncoderCountinLastSecond > leftExpectedTicks){
               if(LeftSpeed < (minForwardSpeed)){
-                LeftSpeed = LeftSpeed--;    //increase motor power
+                //LeftSpeed = LeftSpeed--;    //increase motor power
                 //Serial.print(LeftSpeed);
                 //Serial.println("");
               }
