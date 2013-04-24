@@ -34,17 +34,19 @@ namespace SmartWalkerApplication.Commands
                     SetForegroundWindow(p[0].MainWindowHandle);*/
            
 
-            System.Threading.Thread.Sleep(1500);
+            
 
             // "Tab" twice to get onto Apply button and press "Enter"
             // to start software
-           // SendKeys.SendWait("%{TAB}");
-            //SendKeys.SendWait("{TAB}");
+
+            System.Threading.Thread.Sleep(4000);
 
             SendKeys.SendWait("{TAB}");
+            System.Threading.Thread.Sleep(500);
             SendKeys.SendWait("{TAB}");
+            System.Threading.Thread.Sleep(500);
             SendKeys.SendWait("{ENTER}");
-            System.Threading.Thread.Sleep(2000);
+            System.Threading.Thread.Sleep(4000);
 
              SendKeys.SendWait("%{TAB}");
 
@@ -70,9 +72,15 @@ namespace SmartWalkerApplication.Commands
             SendKeys.SendWait("{ENTER}");
             System.Threading.Thread.Sleep(2000);
 
-            SendKeys.SendWait("%{f4 }");
+            // Close the Zone Trend window as well as the OSXL-101 software
+            SendKeys.SendWait("%{f4}");
             System.Threading.Thread.Sleep(500);
-            SendKeys.SendWait("%{f4 }");
+
+            SendKeys.SendWait("% ");
+            System.Threading.Thread.Sleep(500);
+            SendKeys.SendWait("{UP}");
+            System.Threading.Thread.Sleep(500);
+            SendKeys.SendWait("{ENTER}");
 
             // Read from graphData.csv file 
             var reader = new StreamReader("C:\\Users\\tjd9961\\Desktop\\graphData.csv");
