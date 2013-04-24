@@ -404,6 +404,17 @@ void loop(){
             }
             */
             break;
+            case 4:
+              if (firstTime) {
+                  RightSpeed -= 500;
+                  firstTime = false;
+                  rightExpectedTicks = -rightExpectedTicks;
+                  leftExpectedTicks = leftExpectedTicks;
+                  
+               }
+           LeftSpeed = 1680;
+                  RightSpeed = 1000;
+           break;
            case 5:
              myRightMotor.writeMicroseconds(1550); //set initial servo position at stop
              myLeftMotor.writeMicroseconds(1550); //set initial servo position at stop

@@ -35,6 +35,15 @@ namespace SmartWalkerApplication.Commands
             this.initialDirectionDegree = initialDirectionDegree;
         }
 
+        private bool withinDegrees(int initialReading, int currentReading)
+        {
+            if ((currentReading <= initialReading + 7) && (currentReading >= initialReading - 7))
+            {
+                return true;
+            }
+            return false;
+        }
+
 
         public void start()
         {
@@ -43,7 +52,7 @@ namespace SmartWalkerApplication.Commands
 
             port = COMConnection.COMConnection.Instance;
             
-            /*
+            
             int startingDegree = getAverageCurrentLocationInDegrees();
             int degreeDifference = getDegreeAddition(startingDegree, initialDirectionDegree);
 
@@ -51,11 +60,22 @@ namespace SmartWalkerApplication.Commands
             
             // Start dat swivel
 
-            port.sendString("N");
-            port.sendString("30707");
-            System.Threading.Thread.Sleep(500); // Let the wheels get going
+            if (initialDirectionDegree <= 180)
+            {
+
+
+                port.sendString("N");
+                port.sendString("30707");
+                System.Threading.Thread.Sleep(500); // Let the wheels get going
+            }
+            else
+            {
+                port.sendString("N");
+                port.sendString("40707");
+                System.Threading.Thread.Sleep(500); // Let the wheels get going
+            }
             
-            while (startingDegree <= degreeDifference)
+            while (!(withinDegrees(degreeDifference, startingDegree)))
             {
                 startingDegree = getAverageCurrentLocationInDegrees();
                 Console.WriteLine("New Degree: " + startingDegree);
@@ -65,7 +85,7 @@ namespace SmartWalkerApplication.Commands
             port.sendString("N");
             port.sendString("51010");
             System.Threading.Thread.Sleep(500); // Let the wheels get going
-            */
+            
             // Go Forward
             
             //port.sendString("N");
@@ -108,7 +128,7 @@ namespace SmartWalkerApplication.Commands
                             break;
                         default:
                             Console.WriteLine("SWIVEL!");
-                            myString = "50909";
+                            swivelRight();
                             break;
                     }
                     //if (walkerKinect.isRightTurnBetter())
@@ -145,7 +165,7 @@ namespace SmartWalkerApplication.Commands
                             break;
                         default:
                             Console.WriteLine("SWIVEL!");
-                            myString = "50909";
+                            swivelRight();
                             break;
                     }
                     //if (walkerKinect.isRightTurnBetter())
@@ -215,6 +235,11 @@ namespace SmartWalkerApplication.Commands
              * */
             port.closeConnection();
             //port.Close();
+        }
+
+        private void swivelRight()
+        {
+            myString = "30707";
         }
 
         private void pivotRight()

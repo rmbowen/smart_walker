@@ -860,10 +860,10 @@ namespace SmartWalker
             {
                 if (columnMinsCopy[i, 0] == 1)
                 {
-                    if (i < 80)
+                    if (i < 80 && i > 7)
                     {
                         if (columnMinsCopy[i,1] < 1000){
-                            leftIsBlocked = true;
+                            rightIsBlocked = true;
                         }
                     }
                     else if (i < 240)
@@ -873,13 +873,12 @@ namespace SmartWalker
                             centerIsBlocked = true;
                         }
                     }
-                    else
+                    else if (i < 312)
                     {
                         if (columnMinsCopy[i,1] < 1000){
-                            rightIsBlocked = true;
+                            leftIsBlocked = true;
                         }
                     }
-
                     //if (i < 160)
                     //{
                         //if (leftMin == -1)
@@ -914,11 +913,11 @@ namespace SmartWalker
             }
             else if (!leftIsBlocked)
             {
-                return 3;
+                return 2;
             }
             else if (!rightIsBlocked)
             {
-                return 2;
+                return 3;
             }
             else
             {
