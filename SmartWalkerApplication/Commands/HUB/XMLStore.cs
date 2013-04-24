@@ -14,10 +14,10 @@ namespace SmartWalkerApplication.Commands.HUB
         private string startTag = "<smartwalker>";
         private string endTag = "</smartwalker>";
 
-        private LinkedList<Force> force;
-        private LinkedList<HeartRate> heartRate;
-        private LinkedList<Strain> strain;
-        private LinkedList<Thermal> thermal;
+        public LinkedList<Force> force;
+        public LinkedList<HeartRate> heartRate;
+        public LinkedList<Strain> strain;
+        public LinkedList<Thermal> thermal;
 
         private static XMLStore instance;
 
@@ -48,10 +48,12 @@ namespace SmartWalkerApplication.Commands.HUB
             HUBXMLString.Append(startTag);
 
             // Print all object XML here
+            foreach (Thermal objectItem in thermal)
+            {
+                HUBXMLString.Append(objectItem.toXML());
+            }
 
             HUBXMLString.Append(endTag);
-
-
 
             return HUBXMLString.ToString();
         }

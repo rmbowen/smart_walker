@@ -1,4 +1,6 @@
-﻿using System;
+﻿using SmartWalkerApplication.Commands.HUB;
+using SmartWalkerApplication.Commands.Vitals;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -67,6 +69,9 @@ namespace SmartWalkerApplication.Commands
                         ThermalCommand tc = new ThermalCommand();
                         string temperature = tc.start();
                         Console.WriteLine(temperature);
+                        Thermal thermal = new Thermal(temperature);
+                        XMLStore xml = XMLStore.Instance;
+                        xml.thermal.AddLast(thermal);
                     }
                 }
                 else if (words[0].Equals("Wireless"))
