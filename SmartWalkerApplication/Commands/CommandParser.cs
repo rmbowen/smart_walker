@@ -59,6 +59,17 @@ namespace SmartWalkerApplication.Commands
                         fc.start();
                     }
                 }
+                else if (words[0].Equals("Heart"))
+                {
+                    if (words.Length == 1)
+                    {
+                        Console.WriteLine("Heart Rate Command Entered");
+                        invalidCommand = false;
+
+                        HeartRateCommand hrc = new HeartRateCommand();
+                        hrc.start();
+                    }
+                }
                 else if (words[0].Equals("Thermal"))
                 {
                     if (words.Length == 1)

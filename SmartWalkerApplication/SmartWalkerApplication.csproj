@@ -48,6 +48,7 @@
     <Compile Include="Commands\COMConnection\COMConnection.cs" />
     <Compile Include="Commands\CommandParser.cs" />
     <Compile Include="Commands\ForceCommand.cs" />
+    <Compile Include="Commands\HeartRateCommand.cs" />
     <Compile Include="Commands\HUB\XMLStore.cs" />
     <Compile Include="Commands\Kinect\MainTest.cs" />
     <Compile Include="Commands\Kinect\SmartWalker.cs" />
