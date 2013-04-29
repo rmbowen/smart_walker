@@ -1,4 +1,14 @@
-﻿using SmartWalker;
+﻿//
+// NavigationCommand.cs
+//
+// Handles the creation of the NavigationCommand, interaction
+// with the Kinect, and communicating to both the motors and
+// the IMU
+//
+// @author - Thomas DeMeo 
+//
+
+using SmartWalker;
 using System;
 using System.Collections.Generic;
 using System.IO.Ports;
@@ -17,23 +27,24 @@ namespace SmartWalkerApplication.Commands
     class NavigationCommand
     {
         static SmartWalkerKinect walkerKinect;
-
         private COMConnection.COMConnection port;
-
-        private string myString = "51010";
-
-        // Settings for connecting to Arduino
-        private const string portName = @"COM8";
-        private const int baudRate = 9600;
-
+        private string motorControlString = "51010";
         private double angle = 0.0;
 
+        // Initial Direction Provided to the NavigationCommand
         private int initialDirectionDegree;
 
         public NavigationCommand(int initialDirectionDegree)
         {
             this.initialDirectionDegree = initialDirectionDegree;
         }
+
+        /**
+         * withinDegrees - Check to see if the two readings provided are within 7
+         *                  degrees of each other
+         * 
+         * @return - none
+         **/
 
         private bool withinDegrees(int initialReading, int currentReading)
         {
@@ -44,26 +55,31 @@ namespace SmartWalkerApplication.Commands
             return false;
         }
 
+        /**
+         * start - Begins taking in CommandLine arguments and parses them
+         *          into valid or invalid commands
+         * 
+         * @return - none
+         **/
 
         public void start()
         {
-            // Start the Kinect Program Piece
+            // Start the Kinect
             startKinect();
 
+            // Get the Arduino Port Object
             port = COMConnection.COMConnection.Instance;
             
-            
+            // Get the current relative angle from the IMU
             int startingDegree = getAverageCurrentLocationInDegrees();
             int degreeDifference = getDegreeAddition(startingDegree, initialDirectionDegree);
 
             Console.WriteLine("Degree IMU Needs to get to: " + degreeDifference);
             
-            // Start dat swivel
-
+            // Perform the initial Swivel to get to the appropriate starting direction
+            // If less than 180 swivel right
             if (initialDirectionDegree <= 180)
             {
-
-
                 port.sendString("N");
                 port.sendString("30707");
                 System.Threading.Thread.Sleep(500); // Let the wheels get going
@@ -75,22 +91,17 @@ namespace SmartWalkerApplication.Commands
                 System.Threading.Thread.Sleep(500); // Let the wheels get going
             }
             
+            // Until we get to the right direction keep swiveling
             while (!(withinDegrees(degreeDifference, startingDegree)))
             {
                 startingDegree = getAverageCurrentLocationInDegrees();
                 Console.WriteLine("New Degree: " + startingDegree);
             }
             
-            // Stop, wait 1 second, start moving
+            // Stop, wait 0.5 seconds 
             port.sendString("N");
             port.sendString("51010");
-            System.Threading.Thread.Sleep(500); // Let the wheels get going
-            
-            // Go Forward
-            
-            //port.sendString("N");
-            //port.sendString("11010");
-            //System.Threading.Thread.Sleep(500);
+            System.Threading.Thread.Sleep(500);
 
             while (true)
             {
@@ -98,6 +109,7 @@ namespace SmartWalkerApplication.Commands
                 // send mode
                 //port.sendString(Console.ReadLine());
 
+                // Make sure we are in Navigation Mode
                 port.sendString("N");
 
                 //System.Threading.Thread.Sleep(500);
@@ -109,6 +121,7 @@ namespace SmartWalkerApplication.Commands
                 // send left ticks
                 //port.sendString(Console.ReadLine());
                 
+                // Check for first threshhold
                 if (walkerKinect.isEmergency())
                 {
                     int turnResult = walkerKinect.isRightTurnBetter();
@@ -131,21 +144,8 @@ namespace SmartWalkerApplication.Commands
                             swivelRight();
                             break;
                     }
-                    //if (walkerKinect.isRightTurnBetter())
-                    //{
-                    //    Console.WriteLine("Stop, start turning RIGHT!");
-
-                    //    pivotRight();
-                    //}
-                    //else
-                    //{
-                    //    Console.WriteLine("Stop, start turning Left!");
-
-                    //    pivotLeft();
-                    //}
-                    //goStraight();
-
                 }
+                // Check for Second Threshold
                 else if (walkerKinect.isBlocked())
                 {
                     int turnResult = walkerKinect.isRightTurnBetter();
@@ -168,113 +168,64 @@ namespace SmartWalkerApplication.Commands
                             swivelRight();
                             break;
                     }
-                    //if (walkerKinect.isRightTurnBetter())
-                    //{
-                    //    Console.WriteLine("Start turning slowly RIGHT!");
-                    //    glideRight();
-                    //}
-                    //else
-                    //{
-                    //    Console.WriteLine("Start turning slowly LEFT!");
-
-                    //    glideLeft();
-                    //}
-
                 }
                 else
                 {
-
+                    // If there are no problems just keep going straight
                     Console.WriteLine("KEEP GOING STRAIGHT!");
                     goStraight();
                 }
                 
-                port.sendString(myString);
+                // Send the determined string to the Arduino for the motors
+                port.sendString(motorControlString);
                 System.Threading.Thread.Sleep(500);
-
             }
-            
-            //while (true)
-            //{
-            //    if (walkerKinect.isEmergency())
-            //    {
-            //        Console.WriteLine("STOP, START TURNING!");
-            //        swivelRight();
-
-            //    }
-            //    else if (walkerKinect.isBlocked())
-            //    {
-            //        Console.WriteLine("START TURNING SLOWLY!");
-            //        turnRight();
-            //    }
-            //    else
-            //    {
-            //        goStraight();
-            //    }
-            //}
-            
-
-         /*   if (!SmartWalkerKinect.isBlocked())
-            {
-
-            }
-            */
-            
-            // Send data to IMU?
-            //Console.WriteLine("Send:");
-
-            //port.WriteLine("L");
-            //port.WriteLine("1100");
-
-            /*
-            for (; ; )
-            {
-                Console.WriteLine(" ");
-                Console.WriteLine("> ");
-                port.WriteLine(Console.ReadLine());
-            }
-             * */
+ 
+            // Close the connection to the Arduino
             port.closeConnection();
-            //port.Close();
         }
 
         private void swivelRight()
         {
-            myString = "30707";
+            motorControlString = "30707";
         }
 
         private void pivotRight()
         {
-            myString = "11305";
+            motorControlString = "11305";
         }
 
         private void glideRight()
         {
-            //Stop motors
-            myString = "11307";
-
+            motorControlString = "11307";
         }
 
         private void pivotLeft()
         {
-            myString = "10512";
+            motorControlString = "10512";
         }
 
         private void glideLeft()
         {
-            //Stop motors
-            myString = "10712";
-
+            motorControlString = "10712";
         }
 
         private void goStraight()
         {
-            myString = "10909";
+            motorControlString = "10909";
         }
 
         private void goStraightSlowly()
         {
-            myString = "10707";
+            motorControlString = "10707";
         } 
+
+        /**
+         * getDegreeAddition - this methods adds two degrees together
+         *                      taking into account if this number gets over 360
+         * 
+         * @return - The result of the two degrees added together
+         **/
 
         private int getDegreeAddition(int startDegree, int endDegree)
         {
@@ -286,6 +237,14 @@ namespace SmartWalkerApplication.Commands
             return result;
         }
 
+        /**
+         * getAverageCurrentLocationInDegrees - This method gets three values from the IMU
+         *                                      and averages them together to get a current
+         *                                      position
+         * 
+         * @return - The result the three location values averaged together
+         **/
+
         private int getAverageCurrentLocationInDegrees()
         {
             int startingDegree1 = getCurrentLocationInDegrees();
@@ -296,13 +255,21 @@ namespace SmartWalkerApplication.Commands
 
         }
 
+        /**
+        * getCurrentLocationInDegrees - This method gets an IMU value from the Arduino
+        * 
+        * @return - The resulting value as an integer
+        **/
+
         private int getCurrentLocationInDegrees()
         {
             port.sendString("D");
              //Delay a bit for the serial to catch up
             System.Threading.Thread.Sleep(100);
+
+            // Read the IMU value being sent back from the arduino
             string degreeString = port.readLineString();
-            Console.WriteLine("Recieved Value: " + degreeString);
+
             int degree = 0;
             try
             {
@@ -314,6 +281,13 @@ namespace SmartWalkerApplication.Commands
             }
             return degree;
         }
+
+        /**
+        * startKinect - Initializes the Kinect and any other
+        *              subcomponents that neede to be
+        * 
+        * @return - none
+        **/
 
         private void startKinect()
         {
@@ -329,7 +303,7 @@ namespace SmartWalkerApplication.Commands
             aTimer.Enabled = true;
             //while (endProgram) { }
             */
-            Console.WriteLine("Kinect is Waiting:");
+
             /*if (Console.ReadLine() != null)
             {
                 walkerKinect.printMap();
@@ -338,6 +312,7 @@ namespace SmartWalkerApplication.Commands
              */
         }
 
+        // Currently unused method
         // Specify what you want to happen when the Elapsed event is raised.
         private void OnTimedEvent(object source, ElapsedEventArgs e)
         {
@@ -347,20 +322,6 @@ namespace SmartWalkerApplication.Commands
             walkerKinect.setAngle(angle);
             //walkerKinect.stopKinect();
             //endProgram = true;
-        }
-
-        // Function to get the baud rate
-        static int GetBaudRate()
-        {
-            try
-            {
-                return int.Parse(Console.ReadLine());
-            }
-            catch
-            {
-                Console.WriteLine("Invalid integer.  Please try again:");
-                return GetBaudRate();
-            }
         }
     }
 }

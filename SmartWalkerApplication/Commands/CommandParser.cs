@@ -1,4 +1,14 @@
-﻿using SmartWalkerApplication.Commands.HUB;
+﻿//
+// CommandParser.cs
+//
+// This class takes in an input from the command line and
+// parses it out into a number of valid commands which are
+// then executed
+//
+// @author - Thomas DeMeo 
+//
+
+using SmartWalkerApplication.Commands.HUB;
 using SmartWalkerApplication.Commands.Vitals;
 using System;
 using System.Collections.Generic;
@@ -11,20 +21,28 @@ namespace SmartWalkerApplication.Commands
     class CommandParser
     {
 
-        public CommandParser()
-        {
-        }
+        /**
+         * start - Begins taking in CommandLine arguments and parses them
+         *          into valid or invalid commands
+         * 
+         * @return - none
+         **/
 
         public void start()
         {
+            // Loop forever
             while (true)
             {
+                // Take in User input
                 Console.WriteLine("Enter a command: ");
                 string input = Console.ReadLine();
                 Console.WriteLine();
+
+                // Parse input and store in string array
                 string[] words = input.Split(' ');
                 bool invalidCommand = true;
 
+                // Check for each of the valid command types
                 if (words[0].Equals("Mic"))
                 {
                     if (words.Length == 1)
@@ -40,6 +58,7 @@ namespace SmartWalkerApplication.Commands
                         Console.WriteLine("Navigation Command Entered");
                         invalidCommand = false;
 
+                        // Create NavCommand with initial direction to head in
                         NavigationCommand nc = new NavigationCommand(int.Parse(words[1]));
                         nc.start();
                         //nc.startKinect();
@@ -50,7 +69,7 @@ namespace SmartWalkerApplication.Commands
                 }
                 else if (words[0].Equals("Force"))
                 {
-                    if (words.Length == 2)
+                    if (words.Length == 1)
                     {
                         Console.WriteLine("Force Command Entered");
                         invalidCommand = false;
@@ -87,27 +106,27 @@ namespace SmartWalkerApplication.Commands
                 }
                 else if (words[0].Equals("Wireless"))
                 {
-                    if (words.Length == 1)
+                    if (words.Length == 2)
                     {
                         Console.WriteLine("Wireless Command Entered");
                         invalidCommand = false;
 
                         WirelessCommand wc = new WirelessCommand();
-                        wc.sendEmail("thomasdemeo@gmail.com", "thomasdemeo@gmail.com", "Smart Walker Data", null);
+                        // Send Email to entered email address
+                        wc.sendEmail("thomasdemeo@gmail.com", words[1], "Smart Walker Data", null);
                     }
                 }
+                // If no valid command was entered print out list of possible commands
                 if (invalidCommand) {
                     Console.WriteLine(input + " is not a valid command");
                     Console.WriteLine("Valid Commands Include:");
                     Console.WriteLine("Mic (read microphone array)");
                     Console.WriteLine("Navigation [degree] (start navigation system)");
-                    Console.WriteLine("Force [Left/Right] (read force sensors)");
+                    Console.WriteLine("Force (read force sensors)");
                     Console.WriteLine();
 
                 }
             }
         }
     }
-
-    
 }
