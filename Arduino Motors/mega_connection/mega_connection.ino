@@ -160,23 +160,23 @@ void loop(){
      //while(Serial.available() != 0) {
        //delay(5000);
        
-      //attachInterrupt(leftInterruptValue,countLeft,RISING);
-      //attachInterrupt(rightInterruptValue,countRight,RISING);
+      attachInterrupt(leftInterruptValue,countLeft,RISING);
+      attachInterrupt(rightInterruptValue,countRight,RISING);
       
       while(Serial.available() == 0) {}
       //if (Serial.available() > 0) {
       String myString = String(Serial.parseInt());
-      Serial.print("String Entered ");      
-      Serial.println(myString);
+      //Serial.print("String Entered ");      
+      //Serial.println(myString);
       char charBuf[6];
       
 
       myString.toCharArray(charBuf, 6);
-      
+      /*
       for(int i=0; i<6; i++){
           Serial.print(charBuf[i]);
       }
-      
+      */
       //Serial.print("First Num: ");
       //Serial.println(charBuf[0]);
       
@@ -246,8 +246,8 @@ void loop(){
         starttime = micros();
         endtime = starttime;
         
-        //detachInterrupt(leftInterruptValue);
-        //detachInterrupt(rightInterruptValue);
+        detachInterrupt(leftInterruptValue);
+        detachInterrupt(rightInterruptValue);
         
         while((endtime - starttime) <= 10000){
 
@@ -274,8 +274,8 @@ void loop(){
           endtime = micros();
        } //end while loop of timer
   
-        //attachInterrupt(leftInterruptValue,countLeft,RISING);
-        //attachInterrupt(rightInterruptValue,countRight,RISING);
+        attachInterrupt(leftInterruptValue,countLeft,RISING);
+        attachInterrupt(rightInterruptValue,countRight,RISING);
   
         //loopcount = loopcount + 1;
         

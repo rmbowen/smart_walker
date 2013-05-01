@@ -31,6 +31,10 @@ namespace SmartWalkerApplication.Commands
         private string motorControlString = "51010";
         private double angle = 0.0;
 
+        private const double mmPerEncoder = 0.2659;
+        private long leftEncoderTick = 0;
+        private long rightEncoderTick = 0;
+
         // Initial Direction Provided to the NavigationCommand
         private int initialDirectionDegree;
 
@@ -103,6 +107,7 @@ namespace SmartWalkerApplication.Commands
             port.sendString("51010");
             System.Threading.Thread.Sleep(500);
 
+
             while (true)
             {
                 //System.Threading.Thread.Sleep(5000);
@@ -128,19 +133,22 @@ namespace SmartWalkerApplication.Commands
                     switch (turnResult)
                     {
                         case 1:
-                            Console.WriteLine("Go Straight Slowly...");
+                            //Console.WriteLine("Go Straight Slowly...");
                             goStraightSlowly();
                             break;
                         case 2:
-                            Console.WriteLine("Stop, start turning LEFT!");
+                            //Console.WriteLine("Stop, start turning LEFT!");
                             pivotLeft();
                             break;
                         case 3:
-                            Console.WriteLine("Stop, start turning RIGHT!");
+                            //Console.WriteLine("Stop, start turning RIGHT!");
                             pivotRight();
                             break;
                         default:
-                            Console.WriteLine("SWIVEL!");
+                            //Console.WriteLine("SWIVEL!");
+                            walkerKinect.setYPos(((leftEncoderTick + rightEncoderTick / 2) * mmPerEncoder) / 20);
+                            walkerKinect.printMap();
+
                             swivelRight();
                             break;
                     }
@@ -152,19 +160,22 @@ namespace SmartWalkerApplication.Commands
                     switch (turnResult)
                     {
                         case 1:
-                            Console.WriteLine("Go Straight Slowly...");
+                            //Console.WriteLine("Go Straight Slowly...");
                             goStraightSlowly();
                             break;
                         case 2:
-                            Console.WriteLine("Start turning slowly LEFT!");
+                            //Console.WriteLine("Start turning slowly LEFT!");
                             glideLeft();
                             break;
                         case 3:
-                            Console.WriteLine("Start turning slowly RIGHT!");
+                            //Console.WriteLine("Start turning slowly RIGHT!");
                             glideRight();
                             break;
                         default:
-                            Console.WriteLine("SWIVEL!");
+                            //Console.WriteLine("SWIVEL!");
+                            walkerKinect.setYPos(((leftEncoderTick + rightEncoderTick / 2) * mmPerEncoder) / 20);
+                            walkerKinect.printMap();
+
                             swivelRight();
                             break;
                     }
@@ -172,21 +183,63 @@ namespace SmartWalkerApplication.Commands
                 else
                 {
                     // If there are no problems just keep going straight
-                    Console.WriteLine("KEEP GOING STRAIGHT!");
+                    //Console.WriteLine("KEEP GOING STRAIGHT!");
                     goStraight();
                 }
-                
+                //port.readLineString();
                 // Send the determined string to the Arduino for the motors
                 port.sendString(motorControlString);
                 System.Threading.Thread.Sleep(500);
 
-                port.sendString("F");
-                string leftEncoderTick = port.readLineString();
-                Console.WriteLine("Left Ticks: " + leftEncoderTick);
-                port.sendString("H");
-                string rightEncoderTick = port.readLineString();
-                Console.WriteLine("Right Ticks: " + rightEncoderTick);
+                //port.clearStream();
 
+                string leftTick = "";
+                string rightTick = "";
+                
+                port.sendString("F");
+                    leftTick = port.readLineString();
+                    //Console.WriteLine("LEFT: " + leftTick);
+                    //leftEncoderTick = tick;
+                    /*byte[] asciiBytes = Encoding.ASCII.GetBytes(leftTick);
+                    Console.WriteLine("Left ASCII Values");
+                    foreach (byte b in asciiBytes)
+                    {
+                        Console.Write(b);
+                    }
+                     * */
+                    Console.WriteLine();
+
+                System.Threading.Thread.Sleep(200);
+
+                port.sendString("H");
+
+                    rightTick = port.readLineString();
+                    
+                Console.WriteLine("Right Ticks: " + rightTick);
+                Console.WriteLine();
+                
+                try
+                {
+                    leftEncoderTick = long.Parse(leftTick);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("ERROR LEFT");
+                }
+                
+                try
+                {
+                    rightEncoderTick = long.Parse(rightTick);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("ERROR RIGHT");
+                }
+                
+                Console.WriteLine("NEW TICKS");
+                Console.WriteLine("Left New: " + leftEncoderTick);
+                Console.WriteLine("Right New: " + rightEncoderTick);
+                
                // System.Threading.Thread.Sleep(500);
             }
  

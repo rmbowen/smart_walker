@@ -965,9 +965,9 @@ namespace SmartWalker
             int rightPixel = -1;
 
             // Find the boundary pixels
-            for (jj = 0; jj < 1000; jj++)
+            for (jj = 0; jj < 2000; jj++)
             {
-                for (ii = 0; ii < 1000; ii++)
+                for (ii = 0; ii < 2000; ii++)
                 {
                     if (floorMap[ii, jj] != 0)
                     {
@@ -997,7 +997,7 @@ namespace SmartWalker
             }
 
             // Write map to file
-            using (System.IO.StreamWriter file = new System.IO.StreamWriter(@"C:\Users\tjd9961\Desktop\Kinect\mapTest1.txt"))
+            using (System.IO.StreamWriter file = new System.IO.StreamWriter(@"C:\Users\Public\Development\mapTest1.txt"))
             {
                 if ((topPixel == bottomPixel) || (leftPixel == rightPixel) || (leftPixel == -1) || (rightPixel == -1) || (topPixel == -1) || (bottomPixel == -1))
                 {
@@ -1008,10 +1008,10 @@ namespace SmartWalker
                 else
                 {
                     //For each column
-                    for (ww = 0; ww < 1000; ww++)
+                    for (ww = 0; ww < 2000; ww++)
                     {
                         //For each row
-                        for (hh = 0; hh < 1000; hh++)
+                        for (hh = 0; hh < 2000; hh++)
                         {
                             //If the current pixel is supposed to be mapped
                             if (hh >= topPixel && hh <= bottomPixel && ww >= leftPixel && ww <= rightPixel)
@@ -1041,7 +1041,7 @@ namespace SmartWalker
                     }
                 }
             }
-            using (System.IO.StreamWriter file = new System.IO.StreamWriter(@"C:\Users\tjd9961\Desktop\Kinect\mapTest2.txt"))
+            using (System.IO.StreamWriter file = new System.IO.StreamWriter(@"C:\Users\Public\Development\mapTest2.txt"))
             {
                 if ((topPixel == bottomPixel) || (leftPixel == rightPixel) || (leftPixel == -1) || (rightPixel == -1) || (topPixel == -1) || (bottomPixel == -1))
                 {
@@ -1050,9 +1050,9 @@ namespace SmartWalker
                 }
                 else
                 {
-                    for (ww = 0; ww < 1000; ww++)
+                    for (ww = 0; ww < 2000; ww++)
                     {
-                        for (hh = 0; hh < 1000; hh++)
+                        for (hh = 0; hh < 2000; hh++)
                         {
                             if (hh >= topPixel && hh <= bottomPixel && ww >= leftPixel && ww <= rightPixel)
                             {
