@@ -116,6 +116,18 @@ namespace SmartWalkerApplication.Commands
                         wc.sendEmail("thomasdemeo@gmail.com", words[1], "Smart Walker Data", null);
                     }
                 }
+                else if(words[0].Equals("Strain"))
+ 
+                {
+                    if(words.Length == 1)
+                    {
+                        Console.WriteLine("Strain Command Entered");
+                        invalidCommand = false;
+
+                        StrainCommand sc = new StrainCommand();
+                        sc.start();
+                    }
+                }
                 // If no valid command was entered print out list of possible commands
                 if (invalidCommand) {
                     Console.WriteLine(input + " is not a valid command");

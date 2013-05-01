@@ -29,7 +29,7 @@ namespace SmartWalkerApplication.Commands
                     WindowStyle = ProcessWindowStyle.Normal
                 }
             };
-
+             
             TakeVideo.Start();
             TakeVideo.WaitForExit();
             */

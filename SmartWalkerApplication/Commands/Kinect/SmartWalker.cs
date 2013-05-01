@@ -830,6 +830,18 @@ namespace SmartWalker
             angle = (newAngle / 180) * Math.PI;
         }
 
+        //Set the x position of the walker
+        public void setXPos(double newXPos)
+        {
+            xPos = newXPos;
+        }
+
+        //Set the y position of the walker
+        public void setYPos(double newYPos)
+        {
+            yPos = newYPos;
+        }
+
         // Return if the Kinect is at its level position
         public bool isKinectLevel()
         {

@@ -13,18 +13,22 @@ int myLeftMotorPin = 12;
 int val;
 int expectedEncoderTicks;
 int RightEncoderPWR = 53;
-int RightEncoderCHA = 51; //Right motor encoders, channel A
+int RightEncoderCHA = 3; //Right motor encoders, channel A
 int RightEncoderCHB = 49; //Right motor encoders, channel B
 int RightEncoderPos=0;
+long RightEncoderPosTotal = 0;
 int RightEncoderCounter = 0;
 int RightEncoderCountinLastSecond = 0;
+int rightInterruptValue = 1;
 
 int LeftEncoderPWR = 52;
-int LeftEncoderCHA = 50; //Left motor encoders, channel A
+int LeftEncoderCHA = 2; //Left motor encoders, channel A
 int LeftEncoderCHB = 48; //Left motor encoders, channel B
 int LeftEncoderPos = 0;
+long LeftEncoderPosTotal = 0;
 int LeftEncoderCounter = 0;
 int LeftEncoderCountinLastSecond = 0;
+int leftInterruptValue = 0; //defined by arduino; search attachinterrupt in google
 
 int RightSpeed = 1550;
 int LeftSpeed = 1550;
@@ -51,7 +55,7 @@ LSM303 compass;
 void setup(){
   Serial.begin(9600); //Set baud rate to 9600
 
-  analogReference(DEFAULT);
+  analogReference(EXTERNAL);
   
   myRightMotor.writeMicroseconds(1550); //set initial servo position at stop
   myRightMotor.attach(myRightMotorPin);  //the pin for the servo control 
@@ -113,15 +117,37 @@ void loop(){
     
     case 'L': // Left Force Sensor
       // read input from A4 pin - Left Force Sensor
-      sensorValue = analogRead(A4);
+      sensorValue = analogRead(A1);
       Serial.println(sensorValue);
       break;
     case 'R': // Right Force Sensor
       // read input from A5 pin - Right Force Sensor
-      sensorValue = analogRead(A5);
+      sensorValue = analogRead(A0);
       //printDouble(sensorValue, 1000);
       Serial.println(sensorValue);
       break;
+    case '1': // Strain gauge 1
+      sensorValue = analogRead(A2);
+      Serial.println(sensorValue);
+      break;
+    case '2': // Strain gauge 2
+      sensorValue = analogRead(A3);
+      Serial.println(sensorValue);
+      break;
+    case '3': // Strain gauge 3
+      sensorValue = analogRead(A4);
+      Serial.println(sensorValue);
+      break;
+    case '4': // Strain gauge 4
+      sensorValue = analogRead(A5);
+      Serial.println(sensorValue);
+      break;
+    case 'F':
+      Serial.println(LeftEncoderPosTotal);
+    break;
+    case 'H':
+      Serial.println(RightEncoderPosTotal);
+    break;
     case 'D': // Current Degrees of Walker
 
       compass.read();
@@ -134,6 +160,9 @@ void loop(){
      //while(Serial.available() != 0) {
        //delay(5000);
        
+      //attachInterrupt(leftInterruptValue,countLeft,RISING);
+      //attachInterrupt(rightInterruptValue,countRight,RISING);
+      
       while(Serial.available() == 0) {}
       //if (Serial.available() > 0) {
       String myString = String(Serial.parseInt());
@@ -216,7 +245,10 @@ void loop(){
         //Enable timers and counters
         starttime = micros();
         endtime = starttime;
-
+        
+        //detachInterrupt(leftInterruptValue);
+        //detachInterrupt(rightInterruptValue);
+        
         while((endtime - starttime) <= 10000){
 
           n = digitalRead(RightEncoderCHA); //take in latest value
@@ -242,12 +274,18 @@ void loop(){
           endtime = micros();
        } //end while loop of timer
   
-        loopcount = loopcount + 1;
+        //attachInterrupt(leftInterruptValue,countLeft,RISING);
+        //attachInterrupt(rightInterruptValue,countRight,RISING);
+  
+        //loopcount = loopcount + 1;
         
         RightEncoderCountinLastSecond = RightEncoderPos-RightEncoderCounter;
         LeftEncoderCountinLastSecond = LeftEncoderPos-LeftEncoderCounter;  
         RightEncoderCounter=RightEncoderPos;
         LeftEncoderCounter=LeftEncoderPos;
+        
+        RightEncoderPosTotal = RightEncoderPosTotal + RightEncoderCountinLastSecond;
+        LeftEncoderPosTotal = LeftEncoderPosTotal + LeftEncoderCountinLastSecond;
         
         /*
         Serial.print("Loop #: ");
@@ -438,6 +476,7 @@ void loop(){
   // prints val with number of decimal places determine by precision
   // NOTE: precision is 1 followed by the number of zeros for the desired number of decimial places
   // example: printDouble( 3.1415, 100); // prints 3.14 (two decimal places)
+  
 void printDouble( double val, unsigned int precision) {
 
   Serial.print (int(val));  //prints the int part
@@ -460,3 +499,26 @@ void printDouble( double val, unsigned int precision) {
   Serial.println(frac,DEC) ;
 }
 
+void countLeft(){
+  m = digitalRead(LeftEncoderCHA); //take in latest value
+      if((LeftEncoderCHA_PreviousVal == LOW) && (m==HIGH)){ //check to see if the status has changed
+        if(digitalRead(LeftEncoderCHB) == LOW){ 
+          LeftEncoderPosTotal--; //if the encoder is changing, and CHA is leading, the motor is moving reverse
+        } else {
+          LeftEncoderPosTotal++; //if the encode is changing, and CHB is leading, the motor is moving forward
+        }
+      }
+      LeftEncoderCHA_PreviousVal = m;
+}
+
+void countRight(){
+  n = digitalRead(RightEncoderCHA); //take in latest value
+      if((RightEncoderCHA_PreviousVal == LOW) && (n==HIGH)){ //check to see if the status has changed
+        if(digitalRead(RightEncoderCHB) == LOW){ 
+          RightEncoderPosTotal++; //if the encoder is changing, and CHA is leading, the motor is moving reverse
+        } else {
+          RightEncoderPosTotal--; //if the encode is changing, and CHB is leading, the motor is moving forward
+        }
+      }
+      RightEncoderCHA_PreviousVal = n;
+}

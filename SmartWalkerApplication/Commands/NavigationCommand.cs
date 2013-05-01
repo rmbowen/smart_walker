@@ -69,7 +69,7 @@ namespace SmartWalkerApplication.Commands
 
             // Get the Arduino Port Object
             port = COMConnection.COMConnection.Instance;
-            
+            /*
             // Get the current relative angle from the IMU
             int startingDegree = getAverageCurrentLocationInDegrees();
             int degreeDifference = getDegreeAddition(startingDegree, initialDirectionDegree);
@@ -97,7 +97,7 @@ namespace SmartWalkerApplication.Commands
                 startingDegree = getAverageCurrentLocationInDegrees();
                 Console.WriteLine("New Degree: " + startingDegree);
             }
-            
+            */
             // Stop, wait 0.5 seconds 
             port.sendString("N");
             port.sendString("51010");
@@ -179,6 +179,15 @@ namespace SmartWalkerApplication.Commands
                 // Send the determined string to the Arduino for the motors
                 port.sendString(motorControlString);
                 System.Threading.Thread.Sleep(500);
+
+                port.sendString("F");
+                string leftEncoderTick = port.readLineString();
+                Console.WriteLine("Left Ticks: " + leftEncoderTick);
+                port.sendString("H");
+                string rightEncoderTick = port.readLineString();
+                Console.WriteLine("Right Ticks: " + rightEncoderTick);
+
+               // System.Threading.Thread.Sleep(500);
             }
  
             // Close the connection to the Arduino
