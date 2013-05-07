@@ -34,6 +34,8 @@ namespace SmartWalker
         int[,] columnMins = new int[320, 2];
         int[,] columnMinsCopy = new int[320, 2];
 
+        //NOTE: These are not in the code anywhere at the moment but they could be added where the map is altered instead of 
+        // hard-coding the starting positions to the middle index values of the map
         double xStartIndex = 1000.0; // Starting X index in map (middle of map)
         double yStartIndex = 1000.0; // Starting Y index in map (middle of map)
 
@@ -91,7 +93,6 @@ namespace SmartWalker
 
             //turn on features that you need
             sensor.DepthStream.Enable(DepthImageFormat.Resolution320x240Fps30);
-            sensor.SkeletonStream.Enable();
             sensor.DepthStream.Range = DepthRange.Near;
             //sign up for events if you want to get at API directly
             sensor.AllFramesReady += new EventHandler<AllFramesReadyEventArgs>(newSensor_AllFramesReady);
@@ -129,11 +130,8 @@ namespace SmartWalker
                 {
                     return;
                 }
-
+                // The variable 'pixels' is not actualy used for anything. It is left over from the original Depth Image Program from the Windows SDK
                 byte[] pixels = GenerateColoredBytes(depthFrame);
-
-                //number of bytes per row width * 4 (B,G,R,Empty)
-                int stride = depthFrame.Width * 4;
             }
         }
 
@@ -166,6 +164,9 @@ namespace SmartWalker
             //If this is one of the frames to keep according to the frame rate, then keep it. Otherwise, the frame is dropped.
             if (FrameRateCount == FrameRateDivide)
             {
+                // NOTE: This commented code can be used to tilt the Kinect up and run the camera for a certain number of frames,
+                // tilt the Kinect down and run the camera for a certain number of frames, and the put the Kinect at its "level"
+                // position before allowing the camera to run again
                 /*
                 if (kinectUpCount == 0)
                 {
@@ -200,15 +201,6 @@ namespace SmartWalker
                 }
                 */
                 FrameRateCount = 0;
-
-                //Bgr32  - Blue, Green, Red, empty byte
-                //Bgra32 - Blue, Green, Red, transparency 
-                //You must set transparency for Bgra as .NET defaults a byte to 0 = fully transparent
-
-                //hardcoded locations to Blue, Green, Red (BGR) index positions       
-                const int BlueIndex = 0;
-                const int GreenIndex = 1;
-                const int RedIndex = 2;
 
                 //loop through all distances
                 for (int depthIndex = 0, colorIndex = 0;
@@ -454,29 +446,6 @@ namespace SmartWalker
                             }
                         }
 
-                        if (((rowCounter < 120) && ((depth * Math.Sin(thetaV)) < (walkerHeight - kinectHeight))))
-                        {
-                            double value1 = depth * Math.Sin(thetaV);
-                        }
-                        if (((rowCounter >= 120) && ((depth * Math.Sin(thetaV)) < (kinectHeight))))
-                        {
-                            double value2 = depth * Math.Sin(thetaV);
-                        }
-
-                        //we are very close
-                        if (((rowCounter < 120) && ((depth * Math.Sin((thetaV + (levelPositionAngleDouble / 180 * Math.PI)))) < (walkerHeight - kinectHeight))) || (rowCounter >= 120))
-                        {
-                            pixels[colorIndex + BlueIndex] = 255;
-                            pixels[colorIndex + GreenIndex] = 0;
-                            pixels[colorIndex + RedIndex] = 0;
-                        }
-                        else
-                        {
-                            pixels[colorIndex + BlueIndex] = 255;
-                            pixels[colorIndex + GreenIndex] = 255;
-                            pixels[colorIndex + RedIndex] = 0;
-                        }
-
                     }
 
                     //If the pixel is within the normal threshold
@@ -616,107 +585,8 @@ namespace SmartWalker
                                 }
                             }
                         }
-
-                        if (((rowCounter < 120) && ((depth * Math.Sin(thetaV)) < (walkerHeight - kinectHeight))))
-                        {
-                            double value1 = depth * Math.Sin(thetaV);
-                        }
-                        if (((rowCounter >= 120) && ((depth * Math.Sin(thetaV)) < (kinectHeight))))
-                        {
-                            double value2 = depth * Math.Sin(thetaV);
-                        }
-
-                        //we are very close
-                        if (((rowCounter < 120) && ((depth * Math.Sin((thetaV + (levelPositionAngleDouble / 180 * Math.PI)))) < (walkerHeight - kinectHeight))) || (rowCounter >= 120))
-                        {
-                            pixels[colorIndex + BlueIndex] = 0;
-                            pixels[colorIndex + GreenIndex] = 255;
-                            pixels[colorIndex + RedIndex] = 255;
-                        }
-                        else
-                        {
-                            pixels[colorIndex + BlueIndex] = 50;
-                            pixels[colorIndex + GreenIndex] = 150;
-                            pixels[colorIndex + RedIndex] = 100;
-                        }
                     }
-                    //else if (depth < 0)
-                    //{
-                    //    currentRow += "_";
-                    //}
 
-                    // .9M - 2M or 2.95' - 6.56'
-                    else if (depth > obstacleThreshold && depth < 2000)
-                    {
-                        //we are a bit further away
-                        if (columnCounter < 160)
-                        {
-                            if (!leftBlocked)
-                            {
-                                pixels[colorIndex + BlueIndex] = 0;
-                                pixels[colorIndex + GreenIndex] = 255;
-                                pixels[colorIndex + RedIndex] = 0;
-                            }
-                            else
-                            {
-                                pixels[colorIndex + BlueIndex] = 0;
-                                pixels[colorIndex + GreenIndex] = 100;
-                                pixels[colorIndex + RedIndex] = 0;
-                            }
-                        }
-
-                        if (columnCounter >= 160)
-                        {
-                            if (!rightBlocked)
-                            {
-                                pixels[colorIndex + BlueIndex] = 0;
-                                pixels[colorIndex + GreenIndex] = 255;
-                                pixels[colorIndex + RedIndex] = 0;
-                            }
-                            else
-                            {
-                                pixels[colorIndex + BlueIndex] = 0;
-                                pixels[colorIndex + GreenIndex] = 100;
-                                pixels[colorIndex + RedIndex] = 0;
-                            }
-                        }
-                    }
-                    // 2M+ or 6.56'+
-                    else if (depth > 2000)
-                    {
-                        //we are the farthest
-                        if (columnCounter < 160)
-                        {
-                            if (!leftBlocked)
-                            {
-                                pixels[colorIndex + BlueIndex] = 0;
-                                pixels[colorIndex + GreenIndex] = 0;
-                                pixels[colorIndex + RedIndex] = 255;
-                            }
-                            else
-                            {
-                                pixels[colorIndex + BlueIndex] = 0;
-                                pixels[colorIndex + GreenIndex] = 0;
-                                pixels[colorIndex + RedIndex] = 100;
-                            }
-                        }
-
-                        if (columnCounter >= 160)
-                        {
-                            if (!rightBlocked)
-                            {
-                                pixels[colorIndex + BlueIndex] = 0;
-                                pixels[colorIndex + GreenIndex] = 0;
-                                pixels[colorIndex + RedIndex] = 255;
-                            }
-                            else
-                            {
-                                pixels[colorIndex + BlueIndex] = 0;
-                                pixels[colorIndex + GreenIndex] = 0;
-                                pixels[colorIndex + RedIndex] = 100;
-                            }
-                        }
-                    }
 
                     //Calculate the X and Y position of the Kinect in the map
                     double xMapTemp = 1000.0 + xPos + (Math.Sin(angle + thetaHFull) * (depth / 20.0));
