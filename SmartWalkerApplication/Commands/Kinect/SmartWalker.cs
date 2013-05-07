@@ -1,13 +1,11 @@
-﻿using System;
+﻿//Author -- Steve Smith
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-//using System.Windows.Controls;
 using System.Windows.Input;
-//using System.Windows.Media;
-//using System.Windows.Media.Imaging;
 using Microsoft.Kinect;
 using System.Diagnostics; 
 namespace SmartWalker
@@ -15,14 +13,14 @@ namespace SmartWalker
     public class SmartWalkerKinect
     {
         // convert value from inches to millimeters
-        const double walkerHeight = 39.0 * 2.54 * 10.0; // Height of the walker - 38 inches
-        const double walkerWidth = 27.0 * 2.54 * 10.0;// Width of the walker - 25 inches (added two inches to give wlaker more space)
+        const double walkerHeight = 39.0 * 2.54 * 10.0; // Height of the walker - 38 inches (added an inch to give walker more space
+        const double walkerWidth = 27.0 * 2.54 * 10.0;// Width of the walker - 25 inches (added two inches to give walker more space)
         const double kinectHeight = 19.0 * 2.54 * 10.0; // Height of the Kinect camera from the ground - 19 inches
 
         //Distance is in millimeters
-        const int obstacleThreshold = 1850;  // Distance when objects are considered too close to safely go forward
-        const int mapThreshold = 2000;// Distance when objects are considered obstacles
-        const int emergencyThreshold = 1100;  // Distance up to which the Kinect will map
+        const int obstacleThreshold = 1850;  // Distance when objects are considered obstacles
+        const int mapThreshold = 2000;  // Distance up to which the Kinect will map
+        const int emergencyThreshold = 1100; // Distance when objects are considered too close to safely go forward
 
         static KinectSensor sensor; // The Kinect
 
@@ -67,14 +65,14 @@ namespace SmartWalker
         bool kinectisDown = false; //Is the Kinect facing down?
         bool kinectIsLevel = false; //Is the Kinect at its level position (+9 degrees)
 
-        bool emergencyBlocked = false;
+        bool emergencyBlocked = false; //Is there a blocking obstacle within the emergency threshold?
 
         const float MaxDepthDistance = 4095; // max value returned
         const float MinDepthDistance = 850; // min value returned
         const float MaxDepthDistanceOffset = MaxDepthDistance - MinDepthDistance;
 
-        int levelPositionAngle = 9;
-        double levelPositionAngleDouble = 9.0;
+        int levelPositionAngle = 9; //The angle that the Kinect will go to for normal drive mode
+        double levelPositionAngleDouble = 9.0; //The angle that the Kinect will go to for normal drive mode
 
         public SmartWalkerKinect()
         {
@@ -319,12 +317,6 @@ namespace SmartWalker
                     {
                         thetaV = (21.5 / 180.0 * Math.PI) - thetaV;
                     }
-
-                    //If the Kinect is not level
-                    //if (kinectIsUp || kinectisDown)
-                    //{
-                    //    thetaV += (21.5 / 180.0 * Math.PI);
-                    //}
 
                     //If the pixel is withing the emergency threshold
                     if (depth <= emergencyThreshold && depth >= 0 && allFramesInitialized)
@@ -848,22 +840,16 @@ namespace SmartWalker
             return kinectIsLevel;
         }
 
-        //This method returns true if it decides that a right turn would 
-        //   be safer than a left turn. This method returns false if a 
-        //   left turn will be safer.
-        //The minimum distance to obstacles in each column is calculated 
-        //   for the left side and for the right side. The side that has
-        //   the highest average distance to obstacles will be the correct 
-        //   direction to turn
+        //This method returns an integer that corresponds to which direction the walker should travel next
+        //If the center 160 columns are unblocked, continue straight
+        //If the center is blocked and the left 80 columns( minus the 7 edge pixels, to reduce false obstacles from noise) are free, turn left 
+        //If the center is blocked and the left is blocked, and the right 80 columns( minus the 7 edge pixels, to reduce false obstacles from noise) are free, turn right
+        //Otherwise, the walker has no where to go and it should swivel
+        //
+        //NOTE: The name of the method is outdated, because it no longer decides between left and right
         public int isRightTurnBetter()
         {
             int i = 0;
-            int rightCount = 1;
-            int rightDistanceCount = 0;
-            int leftCount = 1;
-            int leftDistanceCount = 0;
-            int leftMin = -1;
-            int rightMin = -1;
             bool centerIsBlocked = false;
             bool leftIsBlocked = false;
             bool rightIsBlocked = false;
@@ -874,12 +860,14 @@ namespace SmartWalker
                 {
                     if (i < 80 && i > 7)
                     {
+                        //If within 1000mm
                         if (columnMinsCopy[i,1] < 1000){
                             rightIsBlocked = true;
                         }
                     }
                     else if (i < 240)
                     {
+                        //If within 1000mm
                         if (columnMinsCopy[i, 1] < 1000)
                         {
                             centerIsBlocked = true;
@@ -887,64 +875,29 @@ namespace SmartWalker
                     }
                     else if (i < 312)
                     {
+                        //If within 1000mm
                         if (columnMinsCopy[i,1] < 1000){
                             leftIsBlocked = true;
                         }
                     }
-                    //if (i < 160)
-                    //{
-                        //if (leftMin == -1)
-                        //{
-                        //    leftMin = columnMinsCopy[i, 1];
-                        //}
-                        //else if (columnMinsCopy[i, 1] < leftMin)
-                        //{
-                        //    leftMin = columnMinsCopy[i, 1];
-                        //}
-                    //    leftCount++;
-                    //    leftDistanceCount += columnMinsCopy[i,1];
-                    //}
-                    //else
-                    //{
-                        //if (rightMin == -1)
-                        //{
-                        //    rightMin = columnMinsCopy[i, 1];
-                        //}
-                        //else if (columnMinsCopy[i, 1] < rightMin)
-                        //{
-                        //    rightMin = columnMinsCopy[i, 1];
-                        //}
-                    //    rightCount++;
-                    //    rightDistanceCount += columnMinsCopy[i,1];
-                    //}
                 }
             }
             if (!centerIsBlocked)
             {
-                return 1;
+                return 1; // Go Straight
             }
             else if (!leftIsBlocked)
             {
-                return 2;
+                return 2; // Go left
             }
             else if (!rightIsBlocked)
             {
-                return 3;
+                return 3; // Go right
             }
             else
             {
-                return 4;
+                return 4; // Swivel
             }
-
-            //if (leftCount != 0 || rightCount != 0)
-            //{
-                //if ((leftDistanceCount / (leftCount)) > (rightDistanceCount / (rightCount)))
-            //if(leftMin < rightMin)
-            //    {
-            //        return false;
-            //    }
-            //}
-            //return true;
         }
 
         //Print the map to a file
@@ -1041,6 +994,7 @@ namespace SmartWalker
                     }
                 }
             }
+            //Write the map to a file again, just print it in a different orientation this time
             using (System.IO.StreamWriter file = new System.IO.StreamWriter(@"C:\Users\Public\Development\mapTest2.txt"))
             {
                 if ((topPixel == bottomPixel) || (leftPixel == rightPixel) || (leftPixel == -1) || (rightPixel == -1) || (topPixel == -1) || (bottomPixel == -1))
