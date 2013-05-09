@@ -199,8 +199,8 @@ namespace SmartWalker
                         sensor.ElevationAngle = levelPositionAngle; //Set the Kinect to 9 degrees, its level position
                         kinectIsLevel = true;
                     }
-                }
-                */
+                }*/
+                
                 FrameRateCount = 0;
 
                 //Bgr32  - Blue, Green, Red, empty byte

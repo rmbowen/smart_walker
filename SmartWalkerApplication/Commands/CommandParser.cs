@@ -75,7 +75,25 @@ namespace SmartWalkerApplication.Commands
                         invalidCommand = false;
 
                         ForceCommand fc = new ForceCommand();
-                        fc.start();
+                        int leftForce = fc.getLeftForce();
+                        int rightForce = fc.getRightForce();
+
+                        double leftPercent = ((leftForce - 300.0) / 723.0)*100;
+                        double rightPercent = ((rightForce - 300.0) / 723.0)*100;
+
+                        if (leftPercent < 0)
+                        {
+                            leftPercent = 0;
+                        }
+
+                        if (rightPercent < 0)
+                        {
+                            rightPercent = 0;
+                        }
+
+                        Console.WriteLine("Left Percent: " + Convert.ToInt32(leftPercent));
+                        Console.WriteLine("Right Percent: " + Convert.ToInt32(rightPercent));
+                        Force force = new Force();
                     }
                 }
                 else if (words[0].Equals("Heart"))
@@ -98,6 +116,7 @@ namespace SmartWalkerApplication.Commands
 
                         ThermalCommand tc = new ThermalCommand();
                         string temperature = tc.start();
+
                         Console.WriteLine(temperature);
                         Thermal thermal = new Thermal(temperature);
                         XMLStore xml = XMLStore.Instance;
@@ -117,7 +136,6 @@ namespace SmartWalkerApplication.Commands
                     }
                 }
                 else if(words[0].Equals("Strain"))
- 
                 {
                     if(words.Length == 1)
                     {
@@ -125,8 +143,189 @@ namespace SmartWalkerApplication.Commands
                         invalidCommand = false;
 
                         StrainCommand sc = new StrainCommand();
-                        sc.start();
+                        int leftStrain = sc.getLeftStrain();
+                        int rightStrain = sc.getRightStrain();
                     }
+                }
+                else if(words[0].Equals("Vitals"))
+                {
+                    Console.WriteLine("Vitals Command Entered");
+                    invalidCommand = false;
+
+                    int[] rightStrain = new int[5];
+                    int[] leftStrain = new int[5];
+
+                    int[] leftForce = new int[5]; 
+                    int[] rightForce = new int[5]; 
+
+                    StrainCommand sc = new StrainCommand();
+                    ForceCommand fc = new ForceCommand();
+
+                    // run the force and strain 5 times
+                    for (int i = 0; i < 5; ++i)
+                    {
+                        leftForce[i] = fc.getLeftForce();
+                        rightForce[i] = fc.getRightForce();
+
+                        System.Threading.Thread.Sleep(500);
+
+                        leftStrain[i] = sc.getLeftStrain();
+                        rightStrain[i] = sc.getRightStrain();
+                    }
+
+                    double forceAvgLeft = 0;
+                    double forceAvgRight = 0;
+
+                    int strainAvgLeft = 0;
+                    int strainAvgRight = 0;
+
+                    // Average the 5 readings for force and strain
+                    for (int i = 0; i < 5; ++i)
+                    {
+
+                        double leftPercent = ((leftForce[i] - 300.0) / 723.0) * 100;
+                        double rightPercent = ((rightForce[i] - 300.0) / 723.0) * 100;
+
+                        if (leftPercent < 0)
+                        {
+                            leftPercent = 0;
+                        }
+
+                        if (rightPercent < 0)
+                        {
+                            rightPercent = 0;
+                        }
+
+                        forceAvgLeft += leftPercent;
+                        forceAvgRight += rightPercent;
+
+                        strainAvgLeft += leftStrain[i];
+                        strainAvgRight += rightStrain[i];
+                    }
+
+                    forceAvgLeft /= 5;
+                    forceAvgRight /= 5;
+
+                    strainAvgLeft /= 5;
+                    strainAvgRight /= 5;
+
+                    HeartRateCommand tc = new HeartRateCommand();
+                    string results = tc.startBoth();
+
+                    var parts = results.Split(' ');
+
+                    string temperature = parts[0];
+                    string HR = parts[1];
+
+                    Console.WriteLine(Convert.ToInt32(forceAvgLeft));
+                    Console.WriteLine(Convert.ToInt32(forceAvgRight));
+                    Console.WriteLine(strainAvgLeft);
+                    Console.WriteLine(strainAvgRight);
+                    Console.WriteLine(temperature);
+                    Console.WriteLine(HR);
+
+                }
+                else if (words[0].Equals("Auto"))
+                {
+                    invalidCommand = false;
+                    bool strainThresholdNotReached = true;
+
+                    StrainCommand sc = new StrainCommand();
+                    int rightStrainTest;
+
+                    int[] rightStrain = new int[5];
+                    int[] leftStrain = new int[5];
+
+                    int[] leftForce = new int[5];
+                    int[] rightForce = new int[5]; 
+
+                    while(strainThresholdNotReached) {
+
+                        rightStrainTest = sc.getRightStrain();
+                        if (rightStrainTest > 1)
+                        {
+                            strainThresholdNotReached = false;
+                        }
+                    }
+
+                    ForceCommand fc = new ForceCommand();
+
+                    // run the force and strain 5 times
+                    for (int i = 0; i < 5; ++i)
+                    {
+                        leftForce[i] = fc.getLeftForce();
+                        rightForce[i] = fc.getRightForce();
+
+                        System.Threading.Thread.Sleep(500);
+
+                        leftStrain[i] = sc.getLeftStrain();
+                        rightStrain[i] = sc.getRightStrain();
+                    }
+
+                    double forceAvgLeft = 0;
+                    double forceAvgRight = 0;
+
+                    int strainAvgLeft = 0;
+                    int strainAvgRight = 0;
+
+                    // Average the 5 readings for force and strain
+                    for (int i = 0; i < 5; ++i)
+                    {
+                        
+                        double leftPercent = ((leftForce[i] - 300.0) / 723.0) * 100;
+                        double rightPercent = ((rightForce[i] - 300.0) / 723.0) * 100;
+
+                        if (leftPercent < 0)
+                        {
+                            leftPercent = 0;
+                        }
+
+                        if (rightPercent < 0)
+                        {
+                            rightPercent = 0;
+                        }
+
+                        forceAvgLeft += leftPercent;
+                        forceAvgRight += rightPercent;
+
+                        strainAvgLeft += leftStrain[i];
+                        strainAvgRight += rightStrain[i];
+                    }
+
+                    forceAvgLeft /= 5;
+                    forceAvgRight /= 5;
+
+                    strainAvgLeft /= 5;
+                    strainAvgRight /= 5;
+
+                    HeartRateCommand tc = new HeartRateCommand();
+                    string results = tc.startBoth();
+
+                    var parts = results.Split(' ');
+
+                    string temperature = parts[1];
+                    string HR = parts[0];
+
+                    XMLStore xml = XMLStore.Instance;
+                    Thermal th = new Thermal(temperature);
+                    xml.thermal.AddLast(th);
+
+                    Force fo = new Force();
+                    fo.leftForce = forceAvgLeft;
+                    fo.rightForce = forceAvgRight;
+                    fo.leftStrain = strainAvgLeft;
+                    fo.rightStrain = strainAvgRight;
+                    xml.force.AddLast(fo);
+
+                    HeartRate hr = new HeartRate(HR);
+                    xml.heartRate.AddLast(hr);
+
+                    Console.WriteLine(Convert.ToInt32(forceAvgLeft));
+                    Console.WriteLine(Convert.ToInt32(forceAvgRight));
+                    Console.WriteLine(strainAvgLeft);
+                    Console.WriteLine(strainAvgRight);
+                    Console.WriteLine(temperature);
+                    Console.WriteLine(HR);
                 }
                 // If no valid command was entered print out list of possible commands
                 if (invalidCommand) {
@@ -135,8 +334,9 @@ namespace SmartWalkerApplication.Commands
                     Console.WriteLine("Mic (read microphone array)");
                     Console.WriteLine("Navigation [degree] (start navigation system)");
                     Console.WriteLine("Force (read force sensors)");
-                    Console.WriteLine();
-
+                    Console.WriteLine("Strain (read strain gauges");
+                    Console.WriteLine("Thermal (measure temperature)");
+                    Console.WriteLine("Heart (measure heart rate)");
                 }
             }
         }

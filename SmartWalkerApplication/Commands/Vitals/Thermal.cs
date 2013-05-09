@@ -17,7 +17,14 @@ namespace SmartWalkerApplication.Commands.Vitals
         {
             if (temp != null)
             {
-                this.temperature = Double.Parse(temp);
+                try
+                {
+                    this.temperature = Double.Parse(temp);
+                }
+                catch (Exception e)
+                {
+                    this.temperature = 0.0;
+                }
             }
         }
 

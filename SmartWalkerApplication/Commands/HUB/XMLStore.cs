@@ -53,6 +53,18 @@ namespace SmartWalkerApplication.Commands.HUB
                 HUBXMLString.Append(objectItem.toXML());
             }
 
+            // Print all object XML here
+            foreach (HeartRate objectItem in heartRate)
+            {
+                HUBXMLString.Append(objectItem.toXML());
+            }
+
+            // Print all object XML here
+            foreach (Force objectItem in force)
+            {
+                HUBXMLString.Append(objectItem.toXML());
+            }
+
             HUBXMLString.Append(endTag);
 
             return HUBXMLString.ToString();

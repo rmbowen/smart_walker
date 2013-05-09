@@ -98,9 +98,19 @@ namespace SmartWalkerApplication.Commands
 
             // Split the date and temp apart
             var parts = line.Split(',');
+            
+            // Scale the temperature down
+            double temp;
 
+            double.TryParse(parts[1],out temp);
+
+            if(temp > 41.0) {
+                temp *= 0.865614361;
+            }
+
+            string temperature = Convert.ToString(temp);
             // Return the temp in degress C
-            return parts[1];
+            return temperature;
 
             }
             catch (Exception e)

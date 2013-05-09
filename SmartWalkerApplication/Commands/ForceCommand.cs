@@ -23,25 +23,23 @@ namespace SmartWalkerApplication.Commands
             getRightForce();
         }
 
-        private int getLeftForce()
+        public int getLeftForce()
         {
             port.sendString("L");
             //Delay a bit for the serial to catch up
             System.Threading.Thread.Sleep(200);
 
             int force = int.Parse(port.readLineString());
-            Console.WriteLine("Left Force Value: " + force);
             return force;
         }
 
-        private int getRightForce()
+        public int getRightForce()
         {
             port.sendString("R");
             //Delay a bit for the serial to catch up
             System.Threading.Thread.Sleep(200);
 
             int force = int.Parse(port.readLineString());
-            Console.WriteLine("Right Force Value: " + force);
             return force;
         }
     }

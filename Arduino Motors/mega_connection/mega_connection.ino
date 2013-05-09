@@ -126,20 +126,12 @@ void loop(){
       //printDouble(sensorValue, 1000);
       Serial.println(sensorValue);
       break;
-    case '1': // Strain gauge 1
+    case '1': // Left Strain gauge 
       sensorValue = analogRead(A2);
       Serial.println(sensorValue);
       break;
-    case '2': // Strain gauge 2
+    case '2': // Right Strain gauge 2
       sensorValue = analogRead(A3);
-      Serial.println(sensorValue);
-      break;
-    case '3': // Strain gauge 3
-      sensorValue = analogRead(A4);
-      Serial.println(sensorValue);
-      break;
-    case '4': // Strain gauge 4
-      sensorValue = analogRead(A5);
       Serial.println(sensorValue);
       break;
     case 'F':
@@ -160,8 +152,8 @@ void loop(){
      //while(Serial.available() != 0) {
        //delay(5000);
        
-      attachInterrupt(leftInterruptValue,countLeft,RISING);
-      attachInterrupt(rightInterruptValue,countRight,RISING);
+      //attachInterrupt(leftInterruptValue,countLeft,RISING);
+      //attachInterrupt(rightInterruptValue,countRight,RISING);
       
       while(Serial.available() == 0) {}
       //if (Serial.available() > 0) {
@@ -205,8 +197,8 @@ void loop(){
       
       int second;
       second = atoi(newBuf);
-      //Serial.println("Right Ticks");
-      //Serial.println(second);
+      Serial.println("Right Ticks: ");
+      Serial.println(second);
       
       String name3 = String(charBuf[3]);
       String name4 = String(charBuf[4]);
@@ -218,8 +210,8 @@ void loop(){
       
       int third;
       third = atoi(thirdBuf);
-      //Serial.println("Left Ticks");
-      //Serial.println(third);
+      Serial.println("Left Ticks: ");
+      Serial.println(third);
       
       motorDirection = first;
      //}
@@ -246,8 +238,8 @@ void loop(){
         starttime = micros();
         endtime = starttime;
         
-        detachInterrupt(leftInterruptValue);
-        detachInterrupt(rightInterruptValue);
+        //detachInterrupt(leftInterruptValue);
+        //detachInterrupt(rightInterruptValue);
         
         while((endtime - starttime) <= 10000){
 
@@ -274,8 +266,8 @@ void loop(){
           endtime = micros();
        } //end while loop of timer
   
-        attachInterrupt(leftInterruptValue,countLeft,RISING);
-        attachInterrupt(rightInterruptValue,countRight,RISING);
+        //attachInterrupt(leftInterruptValue,countLeft,RISING);
+        //attachInterrupt(rightInterruptValue,countRight,RISING);
   
         //loopcount = loopcount + 1;
         

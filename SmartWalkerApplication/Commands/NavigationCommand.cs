@@ -133,21 +133,21 @@ namespace SmartWalkerApplication.Commands
                     switch (turnResult)
                     {
                         case 1:
-                            //Console.WriteLine("Go Straight Slowly...");
+                            Console.WriteLine("Go Straight Slowly...");
                             goStraightSlowly();
                             break;
                         case 2:
-                            //Console.WriteLine("Stop, start turning LEFT!");
+                            Console.WriteLine("Stop, start turning LEFT!");
                             pivotLeft();
                             break;
                         case 3:
-                            //Console.WriteLine("Stop, start turning RIGHT!");
+                            Console.WriteLine("Stop, start turning RIGHT!");
                             pivotRight();
                             break;
                         default:
-                            //Console.WriteLine("SWIVEL!");
-                            walkerKinect.setYPos(((leftEncoderTick + rightEncoderTick / 2) * mmPerEncoder) / 20);
-                            walkerKinect.printMap();
+                            Console.WriteLine("SWIVEL!");
+                            //walkerKinect.setYPos(((leftEncoderTick + rightEncoderTick / 2) * mmPerEncoder) / 20);
+                            //walkerKinect.printMap();
 
                             swivelRight();
                             break;
@@ -160,21 +160,21 @@ namespace SmartWalkerApplication.Commands
                     switch (turnResult)
                     {
                         case 1:
-                            //Console.WriteLine("Go Straight Slowly...");
+                            Console.WriteLine("Go Straight Slowly...");
                             goStraightSlowly();
                             break;
                         case 2:
-                            //Console.WriteLine("Start turning slowly LEFT!");
+                           Console.WriteLine("Start turning slowly LEFT!");
                             glideLeft();
                             break;
                         case 3:
-                            //Console.WriteLine("Start turning slowly RIGHT!");
+                            Console.WriteLine("Start turning slowly RIGHT!");
                             glideRight();
                             break;
                         default:
-                            //Console.WriteLine("SWIVEL!");
-                            walkerKinect.setYPos(((leftEncoderTick + rightEncoderTick / 2) * mmPerEncoder) / 20);
-                            walkerKinect.printMap();
+                            Console.WriteLine("SWIVEL!");
+                            //walkerKinect.setYPos(((leftEncoderTick + rightEncoderTick / 2) * mmPerEncoder) / 20);
+                            //walkerKinect.printMap();
 
                             swivelRight();
                             break;
@@ -192,7 +192,7 @@ namespace SmartWalkerApplication.Commands
                 System.Threading.Thread.Sleep(500);
 
                 //port.clearStream();
-
+                /*
                 string leftTick = "";
                 string rightTick = "";
                 
@@ -207,11 +207,11 @@ namespace SmartWalkerApplication.Commands
                         Console.Write(b);
                     }
                      * */
-                    Console.WriteLine();
+                    //Console.WriteLine();
 
-                System.Threading.Thread.Sleep(200);
+                //System.Threading.Thread.Sleep(200);
 
-                port.sendString("H");
+               /* port.sendString("H");
 
                     rightTick = port.readLineString();
                     
@@ -241,6 +241,7 @@ namespace SmartWalkerApplication.Commands
                 Console.WriteLine("Right New: " + rightEncoderTick);
                 
                // System.Threading.Thread.Sleep(500);
+                */
             }
  
             // Close the connection to the Arduino
@@ -254,12 +255,12 @@ namespace SmartWalkerApplication.Commands
 
         private void pivotRight()
         {
-            motorControlString = "11305";
+            motorControlString = "11205";
         }
 
         private void glideRight()
         {
-            motorControlString = "11307";
+            motorControlString = "11207";
         }
 
         private void pivotLeft()
