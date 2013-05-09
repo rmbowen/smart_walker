@@ -1,13 +1,11 @@
-﻿using System;
+﻿//Author -- Steve Smith
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-//using System.Windows.Controls;
 using System.Windows.Input;
-//using System.Windows.Media;
-//using System.Windows.Media.Imaging;
 using Microsoft.Kinect;
 using System.Diagnostics; 
 namespace SmartWalker
@@ -15,14 +13,14 @@ namespace SmartWalker
     public class SmartWalkerKinect
     {
         // convert value from inches to millimeters
-        const double walkerHeight = 39.0 * 2.54 * 10.0; // Height of the walker - 38 inches
-        const double walkerWidth = 27.0 * 2.54 * 10.0;// Width of the walker - 25 inches (added two inches to give wlaker more space)
+        const double walkerHeight = 39.0 * 2.54 * 10.0; // Height of the walker - 38 inches (added an inch to give walker more space
+        const double walkerWidth = 27.0 * 2.54 * 10.0;// Width of the walker - 25 inches (added two inches to give walker more space)
         const double kinectHeight = 19.0 * 2.54 * 10.0; // Height of the Kinect camera from the ground - 19 inches
 
         //Distance is in millimeters
-        const int obstacleThreshold = 1850;  // Distance when objects are considered too close to safely go forward
-        const int mapThreshold = 2000;// Distance when objects are considered obstacles
-        const int emergencyThreshold = 1100;  // Distance up to which the Kinect will map
+        const int obstacleThreshold = 1850;  // Distance when objects are considered obstacles
+        const int mapThreshold = 2000;  // Distance up to which the Kinect will map
+        const int emergencyThreshold = 1100; // Distance when objects are considered too close to safely go forward
 
         static KinectSensor sensor; // The Kinect
 
@@ -36,6 +34,8 @@ namespace SmartWalker
         int[,] columnMins = new int[320, 2];
         int[,] columnMinsCopy = new int[320, 2];
 
+        //NOTE: These are not in the code anywhere at the moment but they could be added where the map is altered instead of 
+        // hard-coding the starting positions to the middle index values of the map
         double xStartIndex = 1000.0; // Starting X index in map (middle of map)
         double yStartIndex = 1000.0; // Starting Y index in map (middle of map)
 
@@ -67,14 +67,14 @@ namespace SmartWalker
         bool kinectisDown = false; //Is the Kinect facing down?
         bool kinectIsLevel = false; //Is the Kinect at its level position (+9 degrees)
 
-        bool emergencyBlocked = false;
+        bool emergencyBlocked = false; //Is there a blocking obstacle within the emergency threshold?
 
         const float MaxDepthDistance = 4095; // max value returned
         const float MinDepthDistance = 850; // min value returned
         const float MaxDepthDistanceOffset = MaxDepthDistance - MinDepthDistance;
 
-        int levelPositionAngle = 9;
-        double levelPositionAngleDouble = 9.0;
+        int levelPositionAngle = 9; //The angle that the Kinect will go to for normal drive mode
+        double levelPositionAngleDouble = 9.0; //The angle that the Kinect will go to for normal drive mode
 
         public SmartWalkerKinect()
         {
@@ -93,7 +93,6 @@ namespace SmartWalker
 
             //turn on features that you need
             sensor.DepthStream.Enable(DepthImageFormat.Resolution320x240Fps30);
-            sensor.SkeletonStream.Enable();
             sensor.DepthStream.Range = DepthRange.Near;
             //sign up for events if you want to get at API directly
             sensor.AllFramesReady += new EventHandler<AllFramesReadyEventArgs>(newSensor_AllFramesReady);
@@ -131,11 +130,8 @@ namespace SmartWalker
                 {
                     return;
                 }
-
+                // The variable 'pixels' is not actualy used for anything. It is left over from the original Depth Image Program from the Windows SDK
                 byte[] pixels = GenerateColoredBytes(depthFrame);
-
-                //number of bytes per row width * 4 (B,G,R,Empty)
-                int stride = depthFrame.Width * 4;
             }
         }
 
@@ -168,6 +164,9 @@ namespace SmartWalker
             //If this is one of the frames to keep according to the frame rate, then keep it. Otherwise, the frame is dropped.
             if (FrameRateCount == FrameRateDivide)
             {
+                // NOTE: This commented code can be used to tilt the Kinect up and run the camera for a certain number of frames,
+                // tilt the Kinect down and run the camera for a certain number of frames, and the put the Kinect at its "level"
+                // position before allowing the camera to run again
                 /*
                 if (kinectUpCount == 0)
                 {
@@ -202,15 +201,6 @@ namespace SmartWalker
                 }*/
                 
                 FrameRateCount = 0;
-
-                //Bgr32  - Blue, Green, Red, empty byte
-                //Bgra32 - Blue, Green, Red, transparency 
-                //You must set transparency for Bgra as .NET defaults a byte to 0 = fully transparent
-
-                //hardcoded locations to Blue, Green, Red (BGR) index positions       
-                const int BlueIndex = 0;
-                const int GreenIndex = 1;
-                const int RedIndex = 2;
 
                 //loop through all distances
                 for (int depthIndex = 0, colorIndex = 0;
@@ -319,12 +309,6 @@ namespace SmartWalker
                     {
                         thetaV = (21.5 / 180.0 * Math.PI) - thetaV;
                     }
-
-                    //If the Kinect is not level
-                    //if (kinectIsUp || kinectisDown)
-                    //{
-                    //    thetaV += (21.5 / 180.0 * Math.PI);
-                    //}
 
                     //If the pixel is withing the emergency threshold
                     if (depth <= emergencyThreshold && depth >= 0 && allFramesInitialized)
@@ -460,29 +444,6 @@ namespace SmartWalker
                                     }
                                 }
                             }
-                        }
-
-                        if (((rowCounter < 120) && ((depth * Math.Sin(thetaV)) < (walkerHeight - kinectHeight))))
-                        {
-                            double value1 = depth * Math.Sin(thetaV);
-                        }
-                        if (((rowCounter >= 120) && ((depth * Math.Sin(thetaV)) < (kinectHeight))))
-                        {
-                            double value2 = depth * Math.Sin(thetaV);
-                        }
-
-                        //we are very close
-                        if (((rowCounter < 120) && ((depth * Math.Sin((thetaV + (levelPositionAngleDouble / 180 * Math.PI)))) < (walkerHeight - kinectHeight))) || (rowCounter >= 120))
-                        {
-                            pixels[colorIndex + BlueIndex] = 255;
-                            pixels[colorIndex + GreenIndex] = 0;
-                            pixels[colorIndex + RedIndex] = 0;
-                        }
-                        else
-                        {
-                            pixels[colorIndex + BlueIndex] = 255;
-                            pixels[colorIndex + GreenIndex] = 255;
-                            pixels[colorIndex + RedIndex] = 0;
                         }
 
                     }
@@ -624,107 +585,8 @@ namespace SmartWalker
                                 }
                             }
                         }
-
-                        if (((rowCounter < 120) && ((depth * Math.Sin(thetaV)) < (walkerHeight - kinectHeight))))
-                        {
-                            double value1 = depth * Math.Sin(thetaV);
-                        }
-                        if (((rowCounter >= 120) && ((depth * Math.Sin(thetaV)) < (kinectHeight))))
-                        {
-                            double value2 = depth * Math.Sin(thetaV);
-                        }
-
-                        //we are very close
-                        if (((rowCounter < 120) && ((depth * Math.Sin((thetaV + (levelPositionAngleDouble / 180 * Math.PI)))) < (walkerHeight - kinectHeight))) || (rowCounter >= 120))
-                        {
-                            pixels[colorIndex + BlueIndex] = 0;
-                            pixels[colorIndex + GreenIndex] = 255;
-                            pixels[colorIndex + RedIndex] = 255;
-                        }
-                        else
-                        {
-                            pixels[colorIndex + BlueIndex] = 50;
-                            pixels[colorIndex + GreenIndex] = 150;
-                            pixels[colorIndex + RedIndex] = 100;
-                        }
                     }
-                    //else if (depth < 0)
-                    //{
-                    //    currentRow += "_";
-                    //}
 
-                    // .9M - 2M or 2.95' - 6.56'
-                    else if (depth > obstacleThreshold && depth < 2000)
-                    {
-                        //we are a bit further away
-                        if (columnCounter < 160)
-                        {
-                            if (!leftBlocked)
-                            {
-                                pixels[colorIndex + BlueIndex] = 0;
-                                pixels[colorIndex + GreenIndex] = 255;
-                                pixels[colorIndex + RedIndex] = 0;
-                            }
-                            else
-                            {
-                                pixels[colorIndex + BlueIndex] = 0;
-                                pixels[colorIndex + GreenIndex] = 100;
-                                pixels[colorIndex + RedIndex] = 0;
-                            }
-                        }
-
-                        if (columnCounter >= 160)
-                        {
-                            if (!rightBlocked)
-                            {
-                                pixels[colorIndex + BlueIndex] = 0;
-                                pixels[colorIndex + GreenIndex] = 255;
-                                pixels[colorIndex + RedIndex] = 0;
-                            }
-                            else
-                            {
-                                pixels[colorIndex + BlueIndex] = 0;
-                                pixels[colorIndex + GreenIndex] = 100;
-                                pixels[colorIndex + RedIndex] = 0;
-                            }
-                        }
-                    }
-                    // 2M+ or 6.56'+
-                    else if (depth > 2000)
-                    {
-                        //we are the farthest
-                        if (columnCounter < 160)
-                        {
-                            if (!leftBlocked)
-                            {
-                                pixels[colorIndex + BlueIndex] = 0;
-                                pixels[colorIndex + GreenIndex] = 0;
-                                pixels[colorIndex + RedIndex] = 255;
-                            }
-                            else
-                            {
-                                pixels[colorIndex + BlueIndex] = 0;
-                                pixels[colorIndex + GreenIndex] = 0;
-                                pixels[colorIndex + RedIndex] = 100;
-                            }
-                        }
-
-                        if (columnCounter >= 160)
-                        {
-                            if (!rightBlocked)
-                            {
-                                pixels[colorIndex + BlueIndex] = 0;
-                                pixels[colorIndex + GreenIndex] = 0;
-                                pixels[colorIndex + RedIndex] = 255;
-                            }
-                            else
-                            {
-                                pixels[colorIndex + BlueIndex] = 0;
-                                pixels[colorIndex + GreenIndex] = 0;
-                                pixels[colorIndex + RedIndex] = 100;
-                            }
-                        }
-                    }
 
                     //Calculate the X and Y position of the Kinect in the map
                     double xMapTemp = 1000.0 + xPos + (Math.Sin(angle + thetaHFull) * (depth / 20.0));
@@ -848,22 +710,16 @@ namespace SmartWalker
             return kinectIsLevel;
         }
 
-        //This method returns true if it decides that a right turn would 
-        //   be safer than a left turn. This method returns false if a 
-        //   left turn will be safer.
-        //The minimum distance to obstacles in each column is calculated 
-        //   for the left side and for the right side. The side that has
-        //   the highest average distance to obstacles will be the correct 
-        //   direction to turn
+        //This method returns an integer that corresponds to which direction the walker should travel next
+        //If the center 160 columns are unblocked, continue straight
+        //If the center is blocked and the left 80 columns( minus the 7 edge pixels, to reduce false obstacles from noise) are free, turn left 
+        //If the center is blocked and the left is blocked, and the right 80 columns( minus the 7 edge pixels, to reduce false obstacles from noise) are free, turn right
+        //Otherwise, the walker has no where to go and it should swivel
+        //
+        //NOTE: The name of the method is outdated, because it no longer decides between left and right
         public int isRightTurnBetter()
         {
             int i = 0;
-            int rightCount = 1;
-            int rightDistanceCount = 0;
-            int leftCount = 1;
-            int leftDistanceCount = 0;
-            int leftMin = -1;
-            int rightMin = -1;
             bool centerIsBlocked = false;
             bool leftIsBlocked = false;
             bool rightIsBlocked = false;
@@ -874,12 +730,14 @@ namespace SmartWalker
                 {
                     if (i < 80 && i > 7)
                     {
+                        //If within 1000mm
                         if (columnMinsCopy[i,1] < 1000){
                             rightIsBlocked = true;
                         }
                     }
                     else if (i < 240)
                     {
+                        //If within 1000mm
                         if (columnMinsCopy[i, 1] < 1000)
                         {
                             centerIsBlocked = true;
@@ -887,64 +745,29 @@ namespace SmartWalker
                     }
                     else if (i < 312)
                     {
+                        //If within 1000mm
                         if (columnMinsCopy[i,1] < 1000){
                             leftIsBlocked = true;
                         }
                     }
-                    //if (i < 160)
-                    //{
-                        //if (leftMin == -1)
-                        //{
-                        //    leftMin = columnMinsCopy[i, 1];
-                        //}
-                        //else if (columnMinsCopy[i, 1] < leftMin)
-                        //{
-                        //    leftMin = columnMinsCopy[i, 1];
-                        //}
-                    //    leftCount++;
-                    //    leftDistanceCount += columnMinsCopy[i,1];
-                    //}
-                    //else
-                    //{
-                        //if (rightMin == -1)
-                        //{
-                        //    rightMin = columnMinsCopy[i, 1];
-                        //}
-                        //else if (columnMinsCopy[i, 1] < rightMin)
-                        //{
-                        //    rightMin = columnMinsCopy[i, 1];
-                        //}
-                    //    rightCount++;
-                    //    rightDistanceCount += columnMinsCopy[i,1];
-                    //}
                 }
             }
             if (!centerIsBlocked)
             {
-                return 1;
+                return 1; // Go Straight
             }
             else if (!leftIsBlocked)
             {
-                return 2;
+                return 2; // Go left
             }
             else if (!rightIsBlocked)
             {
-                return 3;
+                return 3; // Go right
             }
             else
             {
-                return 4;
+                return 4; // Swivel
             }
-
-            //if (leftCount != 0 || rightCount != 0)
-            //{
-                //if ((leftDistanceCount / (leftCount)) > (rightDistanceCount / (rightCount)))
-            //if(leftMin < rightMin)
-            //    {
-            //        return false;
-            //    }
-            //}
-            //return true;
         }
 
         //Print the map to a file
@@ -1041,6 +864,7 @@ namespace SmartWalker
                     }
                 }
             }
+            //Write the map to a file again, just print it in a different orientation this time
             using (System.IO.StreamWriter file = new System.IO.StreamWriter(@"C:\Users\Public\Development\mapTest2.txt"))
             {
                 if ((topPixel == bottomPixel) || (leftPixel == rightPixel) || (leftPixel == -1) || (rightPixel == -1) || (topPixel == -1) || (bottomPixel == -1))
