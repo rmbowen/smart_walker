@@ -197,8 +197,8 @@ void loop(){
       
       int second;
       second = atoi(newBuf);
-      Serial.println("Right Ticks: ");
-      Serial.println(second);
+      //Serial.println("Right Ticks: ");
+      //Serial.println(second);
       
       String name3 = String(charBuf[3]);
       String name4 = String(charBuf[4]);
@@ -210,8 +210,8 @@ void loop(){
       
       int third;
       third = atoi(thirdBuf);
-      Serial.println("Left Ticks: ");
-      Serial.println(third);
+      //Serial.println("Left Ticks: ");
+      //Serial.println(third);
       
       motorDirection = first;
      //}

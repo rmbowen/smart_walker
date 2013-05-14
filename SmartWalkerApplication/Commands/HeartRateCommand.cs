@@ -56,7 +56,7 @@ namespace SmartWalkerApplication.Commands
             {
                 StartInfo =
                 {
-                    FileName = "C:\\Users\\Public\\Development\\smart_walker\\Heart Rate\\HRAlgV3.exe",
+                    FileName = "C:\\Users\\Public\\Development\\smart_walker\\Heart Rate\\HRAlgV2.exe",
                     //C:\Users\Public\Development\smart_walker\Heart Rate
                     WorkingDirectory = "C:\\Users\\Public\\Development\\smart_walker\\Heart Rate",
                     CreateNoWindow = false,

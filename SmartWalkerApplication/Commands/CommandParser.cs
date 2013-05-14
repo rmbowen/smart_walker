@@ -145,6 +145,8 @@ namespace SmartWalkerApplication.Commands
                         StrainCommand sc = new StrainCommand();
                         int leftStrain = sc.getLeftStrain();
                         int rightStrain = sc.getRightStrain();
+                        Console.WriteLine("LEFT: " + leftStrain);
+                        Console.WriteLine("Right: " + rightStrain);
                     }
                 }
                 else if(words[0].Equals("Vitals"))
